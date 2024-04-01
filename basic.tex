@@ -3,12 +3,17 @@
 \subsection{Pairing}
 
 \subsection{Digital Signatures}
-\begin{definition}{(Digital Signature)} A digital signature scheme, $SGN(KeyGen,$ $ Sign, Verify)$, consists of four algorithms defined as follows: 
+
+\begin{definition}{(Digital Signature Scheme)} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
 \end{definition}
 \begin{itemize}
-    \item $(pk, sk)\leftarrow SGN.Setup(\kappa, pp)$: Given the security parameter $\kappa$ and public parameters $pp$, it generate a pair of public/secret keys $(pk, sk)$. 
-    \item 
+    \item {\sffamily Setup$(1^\lambda) \to $ par} takes an input the security parameter $1^\lambda$ and outputs global public parameters {\sffamily par}, where {\sffamily par} defines public key infrastructure and domains of messages and signatures, and all related algorithms implicitly take {\sffamily par} as input.  
+    \item {\sffamily Gen(par) $\to $ (pk, sk)} takes as input global parameters {\sffamily par}, and outputs a pair of public/secret keys {\sffamily (pk, sk)}. 
+    \item {\sffamily Sig(sk, m) $\to\sigma$} takes as input secret key {\sffamily sk} and a message {\sffamily m}, and outputs a signature $\sigma$. 
+    \item {\sffamily Ver(pk, m, $\sigma$) $\to b$} is deterministic, takes as input a public key {\sffamily pk}, a message {\sffamily m}, and a signature $\sigma$,  and outputs a bit $b\in\{0,1\}$ indicating whether the signature is valid or not. 
 \end{itemize}
+
+\subsubsection{}
 
 \subsection{Threshold Signatures}
 
