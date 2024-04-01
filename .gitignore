@@ -1,0 +1,10 @@
+*.swp
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+
+*.DS_Store
+survey.pdf
