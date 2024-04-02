@@ -4,13 +4,20 @@
 
 \subsection{Digital Signatures}
 
-\begin{definition}{(Digital Signature Scheme)} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
+\begin{definition}{(\textbf{Digital Signature Scheme})} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
 \end{definition}
 \begin{itemize}
-    \item {\sffamily Setup$(1^\lambda) \to $ par} takes an input the security parameter $1^\lambda$ and outputs global public parameters {\sffamily par}, where {\sffamily par} defines public key infrastructure and domains of messages and signatures, and all related algorithms implicitly take {\sffamily par} as input.  
-    \item {\sffamily Gen(par) $\to $ (pk, sk)} takes as input global parameters {\sffamily par}, and outputs a pair of public/secret keys {\sffamily (pk, sk)}. 
-    \item {\sffamily Sig(sk, m) $\to\sigma$} takes as input secret key {\sffamily sk} and a message {\sffamily m}, and outputs a signature $\sigma$. 
-    \item {\sffamily Ver(pk, m, $\sigma$) $\to b$} is deterministic, takes as input a public key {\sffamily pk}, a message {\sffamily m}, and a signature $\sigma$,  and outputs a bit $b\in\{0,1\}$ indicating whether the signature is valid or not. 
+    \item $\mathsf{Setup(1^\lambda) \to par}$ takes an input the security parameter $1^\lambda$ and outputs global public parameters $\mathsf{par}$, where $\mathsf{par}$ defines public key infrastructure and domains of messages and signatures, and all related algorithms implicitly take $\mathsf{par}$ as input.  
+    \item $\mathsf{Gen(par)} \to (\mathsf{pk}, \mathsf{sk})$ takes as input global parameters $\mathsf{par}$, and outputs a pair of public/secret keys $(\mathsf{pk}, \mathsf{sk})$. 
+    \item $\mathsf{Sig(sk, m)} \to \sigma$ takes as input secret key $\mathsf{sk}$ and a message $\mathsf{m}$, and outputs a signature $\sigma$. 
+    \item $\mathsf{Ver}(\mathsf{pk}, \mathsf{m}, \sigma) \to b $ is deterministic, takes as input a public key $\mathsf{pk}$, a message $\mathsf{m}$, and a signature $\sigma$,  and outputs a bit $b\in\{0,1\}$ indicating whether the signature is valid or not. 
+\end{itemize}
+
+A digital signature scheme should satisfy the following requirements:
+\begin{itemize}
+    \item Correctness: $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, \mathsf{Ver(pk, m, Sig(sk, m))}]=1$. 
+    \item Security: without the secret key $\mathsf{sk}$, even if an adversary queries $\mathsf{Sig(sk, \cdot)}$ on a set of messages, it cannot forge signatures for other messages except with negligible probability. Formally, for all probabilistic polynomial time algorithm $\mathcal{A}$, $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, (\mathsf{x},\mathsf{t})\leftarrow \mathcal{A}^{\mathsf{Sig(sk, \cdot)}}(\mathsf{pk}, 1^\lambda), \mathsf{x}\notin Q, \mathsf{Ver(pk, x, t)}=1] = negl(\lambda)$, where $Q$ is the set of messages that $\mathcal{A}$ queries through the oracle $\mathsf{Sig(sk, \cdot)}$. 
+    
 \end{itemize}
 
 \subsubsection{}
