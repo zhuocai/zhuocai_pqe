@@ -1,7 +1,3 @@
-\subsection{Cryptographic Assumptions}
-
-\subsection{Pairing}
-
 \subsection{Digital Signatures}
 
 \begin{definition}{(\textbf{Digital Signature Scheme})} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
@@ -16,18 +12,81 @@
 A digital signature scheme should satisfy the following requirements:
 \begin{itemize}
     \item Correctness: $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, \mathsf{Ver(pk, m, Sig(sk, m))}]=1$. 
-    \item Security: without the secret key $\mathsf{sk}$, even if an adversary queries $\mathsf{Sig(sk, \cdot)}$ on a set of messages, it cannot forge signatures for other messages except with negligible probability. Formally, for all probabilistic polynomial time algorithm $\mathcal{A}$, $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, (\mathsf{x},\mathsf{t})\leftarrow \mathcal{A}^{\mathsf{Sig(sk, \cdot)}}(\mathsf{pk}, 1^\lambda), \mathsf{x}\notin Q, \mathsf{Ver(pk, x, t)}=1] = negl(\lambda)$, where $Q$ is the set of messages that $\mathcal{A}$ queries through the oracle $\mathsf{Sig(sk, \cdot)}$. 
+    \item EUF-CMA Security (Existentially Unforgeable under Chosen Message Attack): without the secret key $\mathsf{sk}$, even if an adversary queries $\mathsf{Sig(sk, \cdot)}$ on a set of messages, it cannot forge signatures for other messages except with negligible probability. Formally, for all probabilistic polynomial time algorithm $\mathcal{A}$, $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, (\mathsf{x},\mathsf{t})\leftarrow \mathcal{A}^{\mathsf{Sig(sk, \cdot)}}(\mathsf{pk}, 1^\lambda), \mathsf{x}\notin Q, \mathsf{Ver(pk, x, t)}=1] = negl(\lambda)$, where $Q$ is the set of messages that $\mathcal{A}$ queries through the oracle $\mathsf{Sig(sk, \cdot)}$. 
     
 \end{itemize}
 
-\subsubsection{}
+\subsubsection{RSA Signature}
+RSA cryptosystem (Rivest-Shamir-Adleman) is based on the difficulty to factor a product of two large primes. RSA signature is directly based on RSA public key encryption scheme. 
 
-\subsection{Threshold Signatures}
+\paragraph{Key Generation} Choose two large prime numbers $p$ and $q$. Compute $N=pq$ and $\lambda(N) = \mathrm{lcm}(p-1, q-1)$. Choose an integer $e$ such that $1<e < \lambda(N)$ and $\mathrm{gcd}(e, \lambda(N)) = 1$. Then compute $d=e^{-1}\pmod{\lambda(N)}$. The secret key is $\mathsf{sk}=(N, d)$ and the public key is $\mathsf{pk}=(N,e)$. 
 
-\subsection{Multi Signatures}
+\paragraph{Encryption} Given a plaintext message $m$ such that $0\le m < N$, the encryption of $m$ is $c=m^e\pmod{N}$. 
 
-\subsection{Aggregators}
+\paragraph{Decryption} With the secret key $(N, d)$, the plaintext message can be recovered from $c$ as $m = c^d\pmod{N}$. 
 
-\subsection{Weighted Threshold Signatures}
+The important property of RSA algorithm is that $x^{de}=x\pmod{N}$ for any integer $x$ and $e$ is difficult to compute from $d$. 
+
+\paragraph{Signature} In public key encryption, only the owner of secret key $d$ can run the decryption algorithm. In digital signature schemes, a signature can be generated only by the owner of secret key and can be verified by anyone knowing the public key. The public keys and secret keys of RSA have the same structure, RSA encryption and decryption are the same algorithm using different keys. The signing algorithm of RSA signature is exactly the RSA algorithm using the secret key, while the verification algorithm of RSA signature is the RSA algorithm using the public key. 
+
+\paragraph{Signing} Given as input a message $m$ and the secret key $\mathsf{sk}=d$, the signature is $\sigma= H(m)^d \pmod{N}$, where $H$ is a cryptographic hash function. 
+
+\paragraph{Verifying} Given as input a message $m$, a signature $\sigma$ and the public key $\mathsf{pk}=e$, the verification algorithm returns $1$ if $\sigma^e=H(m)\pmod{N}$. 
+
+\subsubsection{ElGamal Signature}
+ElGamal signature scheme is based on algebraic properties of modular exponentiation, together with the discrete logarithm problem. The widely used Digital Signature Scheme is a variant of ElGamal signature scheme. 
+
+\paragraph{Public Parameters} (1) Choose a key length $L$ and a $L$-bit prime number $p$. (2) Choose a cryptographic hash function $H$ with output length $L$ bits. (3) Choose a generator $g$ of the multiplicative group of integers modulo $p$, $Z_p^\times$. 
+
+\paragraph{Key Generation} Choose an integer $x$ randomly from $\{1,\dots, p-2\}$ as secret key $\mathsf{sk}$. The public key $\mathsf{pk}$ is defined as $y=g^x\pmod{p}$. 
+
+\paragraph{Signing} Given as input a message $m$ and secret key $\mathsf{sk}=x$, the signer (1) chooses an integer $k$ randomly from $\{2,\dots, p-2\}$ that is relatively prime to $p-1$, (2) computes $r=g^k\pmod{p}$, (3) computes $s=(H(m)-xr)k^{-1}\pmod{(p-1)}$. The signature is $\sigma=(r,s)$. 
+
+\paragraph{Verifying} Given as input a message $m$, a signature $\sigma=(r,s)$ and public key $\mathsf{pk}=y$, the verifier checks that $0<r<p$, $0<s<p-1$ and $g^{H(m)}=y^r r^s\pmod{p}$. 
+
+
+\subsubsection{Schnorr Signature}
+
+\paragraph{Parameters} All users of the signature scheme agree on a group $G$ of prime order $q$, with generator $g$. All users also agree on a cryptographic hash function $H:\{0,1\}^*\to \mathbb{Z}_q$. 
+
+\paragraph{Schnorr Group} Usually Schnorr signatures use a particular class of groups called Schnorr groups. A \textbf{Schnorr group} is a large prime-order subgroup of $\mathbb{Z}_p^{\times}$, the multiplicative group of integers modulo $p$ for some prime $p$. To generate such a group, generate two prime numbers $p, q (p>q)$, such that $p=qr+1$ for an integer $r$. Then choose any $h$ in the range $1<h<p$ such that $h^r\not\equiv 1$. $g=h^r\bmod p$ is a generator of a subgroup of $\mathbb{Z}_p^\times$ of order $q$. 
+
+\paragraph{Digital Signature Algorithm (DSA)} DSA is a variant of ElGamal signature scheme using Schnorr groups instead of the multiplicative groups $\mathbb{Z}_p^\times$. 
+
+\paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in G$. 
+
+\paragraph{Signing} To sign a message $m$ using the secret key $x$, choose a random $k$ from $Z_q^\times$, let $r=g^k$, compute $e=H(r||m)$, where $||$ denotes concatenation of bit strings. Let $s=k-xe$, the signature is the pair $(s,e)$. Note that $s, e\in Z_q^\times$. 
+
+\paragraph{Verifying} To verify that $(s,e)$ is the signature of $m$ using the public key $y$, the verifier computes $r_v = g^s y^e$ and $e_v = H(r_v||m)$. If $e_v=e$, then accept the signature. 
+
+
+\subsubsection{BLS Signature}
+BLS digital signature was proposed by Boneh, Lynn and Shacham \cite{DBLP:journals/joc/BonehLS04}, using a bilinear pairing for verification. It is provably secure (existentially unforgeable under adaptive chosen-message attacks) in the random oracle model assuming the intractability of the computational Diffie-Hellman problem in a gap Diffie-Hellman group. 
+
+\paragraph{Bilinear Pairing} A mapping $e: G_1\times G_2\to G_T$ is a bilinear pairing for groups $(G_1, G_2, G_T)$ of prime order $q$, if $e(g^x, h^y) = e(g, h)^{xy}$ for generators $g$ of $G_1$ and $h$ of $G_2$. Bilinear pairings allow efficiently solving the decisional Diffie-Hellman problem even though the computational Diffie-Hellman problem remains intractable. For a CDH problem instance $(g, g^x, g^y, g^z)$, testing $g^z=g^{xy}$ is equivalent to checking $e(g^x, g^y) = e(g, g^z)$, for a non-degenerate, efficiently computable bilinear mapping from $G\times G$ to a target group $G_T$. 
+
+\paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in G$. 
+
+\paragraph{Signing} The signature for message $m$ is $\sigma=H(m)^x$ using the secret key $x$.  
+\paragraph{Verification} To verify that $\sigma$ is the signature of $m$ using the public key $y$, the verifier checks that $e(\sigma, g) = e(H(m), y)$. 
+
+
+\subsection{Shamir Secret Sharing and Lagrange Interpolation}
+How to share a secret $s$ among $n$ players such that any subset of at least $t$ players can collaborate to recover $s$ but no subset of fewer than $t$ players can recover $s$ or gain any information about $s$? Each player $i$ should receive a piece of data that is called a share $s_i$ of the secret $s$. The person that owns $s$ and shares it is called the \textbf{dealer}. Shamir's secret sharing is an elegant solution for this problem, that uses the property of univariate polynomials of bounded degrees. 
+
+\paragraph{Construction of Shamir's Secret Sharing} In order to share a secret $s$, the dealer chooses a random polynomial of degree at most $t-1$, $f(X)=\sum_{i=0}^{t-1} a_i X^i$, by setting $a_0=s$ and choosing all other coefficients $a_i(1\le i\le t-1)$ independently at random. The secret share for player $i$ is $s_i = f(i)$. The secret is $s=f(0)$. 
+
+\paragraph{Lagrange Interpolation} Suppose a group of $t$ players want to jointly recover the secret $s$ using their shares $\{x_{j_1}, x_{j_2},\dots, x_{j_t}\}$. Let $J = \{j_1, j_2, \dots, j_t\}$. They can interpolate a polynomial of degree at most $t-1$ that passes the points $\{(j_1, x_{j_1}), (j_2, x_{j_2}), \dots (j_t, x_{j_t})\}$ as
+\begin{equation*} 
+    g(x) = \sum_{k=1}^{t}\frac{\prod_{l \in J\setminus \{j_k\} } (x - l)}{\prod_{l \in J\setminus \{j_k\} } (j_k - l)}\cdot x_{j_k}   
+\end{equation*}
+
+\par Then $g$ is exactly the same polynomial as $f$, because they both have degree at most $t-1$ and they evaluate the same at $t$ different locations. Hence, the secret $s$ is computed as $g(0)$. Denote by $L_{J, j_k}(x) = \frac{\prod_{l \in J\setminus \{j_k\} } (x - l)}{\prod_{l \in J\setminus \{j_k\} } (j_k - l)}$, called the Lagrange multiplier of $j_k$ for the interpolation set $J$. It is interesting to see that $L_{J, j_k}(0)$ only depends on the interpolation set $J$, but not on the values of $f$ in these points.  
+
+For any group of at most $t-1$ players, they only know at most $t-1$ evaluations of the polynomial $f$, so $s$ can be an arbitrary value in the allowed range. Shamir secret sharing is an important building block of many threshold signature schemes. 
+
+\paragraph{(Publicly) Verifiable Secret Sharing} If the dealer is required to prove that the shares are distributed correctly and signers are required to prove that they help reconstruct correctly, the variant of secret sharing is called verifiable secret sharing (VSS). If the proofs can be non-interactive and publicly verified by external parties, then it is called publicly verifiable secret sharing (PVSS). 
 
 \subsection{Adaptive Security}
+
+\subsection{SNARKs}

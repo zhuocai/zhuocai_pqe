@@ -1,0 +1,52 @@
+This section formally defines threshold signatures and introduces a few classical constructions of threshold signatures. 
+\subsection{Definition}
+Threshold signature scheme involves $n$ signers. The typical setting is that any group of $t (1<t\le n)$ signers can collaborate to create a signature for a message $m$. However, any group of fewer than $t$ signers cannot create a signature for any messages. $t$ is the threshold. Each of the $n$ signers only possesses a share of the secret key, while one public key exists that can verify the validity of signatures. 
+
+\paragraph{Trivial Construction} A trivial solution for threshold signature scheme is that each signer generates a secret/public key pair using a digital signature scheme and a concatenation of at least $t$ signatures is considered as a valid signature. The public key of this threshold signature scheme is the list of all $n$ public keys. The disadvantages of the na\"ive threshold signature scheme are (1) the signature size is $\Theta(t)$, (2) the size of public key is $\Theta(n)$ and (3) consequently the verification time is $\Theta(n)$. Note that usually we consider $t = \Theta(n)$. Ideally, we want threshold signature schemes with public keys/signatures of constant size and constant verification time. 
+
+\begin{definition}
+    A $(n, t)$-\textbf{threshold signature scheme}, $\mathsf{TS}$, consists of four algorithms $(\mathsf{Setup, Gen, Sig, Ver})$ defines as the following:
+    \begin{itemize}
+        \item $\mathsf{Setup}(1^\lambda)\to \mathsf{par}$ takes as input the security parameter $1^\lambda$ and outputs global public parameters $\mathsf{par}$, where $\mathsf{par}$ implicitly defines sets of public keys, secret keys, messages and signatures, and all algorithms related to $\mathsf{TS}$ implicitly take $\mathsf{par}$ as input. 
+        \item $\mathsf{Gen(par)}\to (\mathsf{pk, sk_1,\dots, sk_n})$ takes as input public parameters $\mathsf{par}$, and outputs a public key $\mathsf{pk}$ and secret key shares $\mathsf{sk_1, \dots, sk_n}$. 
+        \item $\mathsf{Sig}$ defines an interactive protocol among the a gourp of $t$ signers where signer $i$ owns the secret key share $\mathsf{sk_i}$. Given as input a message $\mathsf{m}$, these $t$ signers jointly output a signature $\sigma$. 
+        \item $\mathsf{Ver}(\mathsf{pk}, \mathsf{m}, \sigma)\to b$ is deterministic, takes as input a public key $\mathsf{pk}$, a message $\mathsf{m}$, and a signature $\sigma$, and outputs a bit $b\in\{0,1\}$ indicating whether the signature is valid. 
+    \end{itemize}
+\end{definition}
+
+\paragraph{Trusted or Distributed Key Generation} Usually the signers cannot choose their own secret key shares independently as if choosing a random secret key in single signer digital signature schemes. They have to collaborate to generate the secret key shares. To make sure that a secret key share of a signer is kept secret against other signers, we have to either assume a trusted third party acts as the dealer that distributes the shares to signers, or design a distributed protocol to securely generate the secret key shares. In this survey, we can assume that there are feasible solutions for distributed key generation.  
+
+\paragraph{Interaction} In the $\mathsf{Sig}$ phase, $t$ signers might interact with each other. Some threshold signature schemes are interactive and others are non-interactive. Depending on the application scenarios, we might allow interaction among signers. In other cases, it is unrealistic for signers to interact with each other. In non-interactive threshold signature schemes, each signer $i$ generates a partial signature $\sigma_i$ for the message $\mathsf{m}$ using the secret key $\mathsf{sk_i}$. 
+
+\subsection{Fault Tolerance} 
+In the aforementioned setting of threshold signatures, we assume that the group of $t$ signers all honestly follow the protocol. In many real-world settings, a subset of signers might be malicious and deviate from the prescribed protocol in an attempt to prevent generating the desired signature correctly or generate signatures for other messages. We might tolerate up to $k$ maliciously corrupted signers such that any group of $\ge t'=t+k$ signers can guarantee the successful generation of valid signatures for any message, while a group of at most $t-1$ signers cannot create a valid signature for any message. 
+
+\paragraph{Malicious Tolerance} {\color{red} TODO figure out the setting for malicious partial signatures}
+
+\par In the next subsections, we present a few classical constructions of threshold signatures. Distributing the secret key shares among a group of participants that do not trust each other is a non-trivial task and rely on expensive Distributed Key Generation (DKG) protocols. DKG is not the focus of this survey, therefore our presentation simply assume that there is a trusted dealer that distributes all the secret key shares among the signers. In practice this trusted dealer is replaced with a suitable DKG protocol. 
+
+\subsection{RSA Threshold Signatures}
+The first construction of threshold signature scheme is based on RSA signatures according to~\cite{DBLP:conf/eurocrypt/Shoup00}. 
+
+\paragraph{Setup} The dealer chooses at random two large primes of equal length $p$ and $q$, where $p=2p' + 1$, $q=2q'+1$, with $p'$, $q'$ themselves prime. Let $N=pq$ be the RSA modulus and make $N$ public. Let $M=p'q'$. Choose a cryptographic hash function $H$ that maps messages of arbitrary lengths to a number modulo $N$. 
+
+\paragraph{Public Key} The dealer chooses a prime exponent $e$ such that $e>n$, and sets the public key $\mathsf{pk}$ as $(N, e)$. 
+
+\paragraph{Secret Key Share} The dealer can compute $d=e^{-1}\pmod{M}$. Using the standard technique of secret sharing, the dealer chooses a random polynomial of degree at most $t'-1$ such that $a_0=d$ and all other coefficients $a_i (1\le i \le t'-1)$ are chosen independently at random. The polynomial is $f(X) = \sum_{i=0}^{t'-1}a_i X^i \in \mathbb{Z}[X]$. 
+
+\par For $1\le i \le n$, the dealer computes the secret key share of signer $i$ as $\mathsf{sk_i} = f(i)\pmod M$. 
+
+\paragraph{Verification Keys} Denote by $Q_N$ the subgroup of squares in $\mathbb{Z}_N^\times$. The dealer chooses a radnom $v\in Q_N$, and computes $v_i=v^{\mathsf{sk_i}}\in Q_N$ for all $i\in \{1, 2, \dots, n\}$. 
+
+\paragraph{Generating a signature share} For a message $M$, let $x=H(M)$. The signature share of player $i$ consists of $\sigma_i = x^{2 \Delta s_i}$. 
+
+
+\subsection{Schnorr Threshold Signatures}
+
+\subsection{BLS Threshold Signatures}
+
+\subsection{Multi Signatures}
+
+\subsection{Aggregators}
+
+\subsection{Weighted Threshold Signatures}

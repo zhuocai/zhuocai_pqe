@@ -6,6 +6,9 @@
 % Other font encondings may result in incorrect characters.
 %
 \usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
@@ -41,11 +44,14 @@ The abstract should briefly summarize the contents of the paper in
 %
 
 \section{Introduction}
-\cite{DBLP:conf/ccs/DasCXNB023}
 \input{intro.tex}
 
-\section{Background and Toolbox}
+\section{Cryptography Preliminaries and Digital Signatures}
 \input{basic.tex}
+
+\section{Classical Threshold Signatures}
+\input{threshold.tex}
+
 
 \section{Topic 1}
 \input{topic1.tex}
