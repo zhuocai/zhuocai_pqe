@@ -32,18 +32,30 @@ The first construction of threshold signature scheme is based on RSA signatures 
 
 \paragraph{Public Key} The dealer chooses a prime exponent $e$ such that $e>n$, and sets the public key $\mathsf{pk}$ as $(N, e)$. 
 
-\paragraph{Secret Key Share} The dealer can compute $d=e^{-1}\pmod{M}$. Using the standard technique of secret sharing, the dealer chooses a random polynomial of degree at most $t'-1$ such that $a_0=d$ and all other coefficients $a_i (1\le i \le t'-1)$ are chosen independently at random. The polynomial is $f(X) = \sum_{i=0}^{t'-1}a_i X^i \in \mathbb{Z}[X]$. 
+\paragraph{Secret Key Share} The dealer can compute $d=e^{-1}\pmod{M}$. Then the dealer chooses a random polynomial of degree at most $t'-1$ such that $a_0=d$ and all other coefficients $a_i (1\le i \le t'-1)$ are chosen independently at random. The polynomial is $f(X) = \sum_{i=0}^{t'-1}a_i X^i \in \mathbb{Z}[X]$. 
 
 \par For $1\le i \le n$, the dealer computes the secret key share of signer $i$ as $\mathsf{sk_i} = f(i)\pmod M$. 
 
-\paragraph{Verification Keys} Denote by $Q_N$ the subgroup of squares in $\mathbb{Z}_N^\times$. The dealer chooses a radnom $v\in Q_N$, and computes $v_i=v^{\mathsf{sk_i}}\in Q_N$ for all $i\in \{1, 2, \dots, n\}$. 
+\paragraph{Verification Keys} Note that the secret and shares are integers in $\mathbb{Z}_M$, but $\mathbb{Z}_M$ is not a field because $M$ is composite number. Therefore, \cite{DBLP:conf/eurocrypt/Shoup00} designs additional verification keys in $Q_N$, a subgroup of squares in $Z_N^\times$. $Q_N$ is a cyclic group of order $m$. The dealer chooses a radnom $v\in Q_N$, and computes $v_i=v^{\mathsf{sk_i}}\in Q_N$ for all $i\in \{1, 2, \dots, n\}$. The verification key is $\mathsf{vk}=v$ and the verification key shares are $\mathsf{vk_i}=v_i$. 
 
-\paragraph{Generating a signature share} For a message $M$, let $x=H(M)$. The signature share of player $i$ consists of $\sigma_i = x^{2 \Delta s_i}$. 
+\paragraph{Lagrange interpolation} Since $\mathbb{Z}_M$ is not a field, the reconstruction formula slightly deviates from standard Lagrange interpolation. Let $\Delta=n!$. For any subset of $S$ of $t'$ points in $\{0,1,\dots, n\}$, and for any $i\in\{0,1,\dots, n\}\setminus S$ and $j\in S$ , we can define: 
+\begin{equation*}
+    \lambda_{i,j}^S = \Delta \frac{\prod_{j'\in S\setminus\{j\}} (i-j')}{\prod_{j'\in S\setminus \{j\}} (j-j')}\in \mathbb{Z}
+\end{equation*} 
+
+The purpose of $\Delta$ is to make sure $\lambda_{i, j}^S$ are integers. Then, we have $\Delta\cdot f(i) = \sum_{j\in S} \lambda_{i,j}^S f(j)\pmod{M}$. 
+
+\paragraph{Generating a signature share} For a message $M$, let $x=H(M)$. The signature share of player $i$ consists of $\sigma_i = x^{2 \Delta \mathsf{sk_i}}$. 
+
+\paragraph{Combining Shares} Suppose we have valid shares from a set $S$ of players, where $S=\{i_1, \dots, i_k\}\subset \{1, 2, \dots, n\}$. To combine the shares, we compute $w=\prod_{j=1}^k \sigma_{i_j}^{2\lambda_{0, i_j}^S} = \prod_{j=1}^k x^{2\lambda_{0, i_j}^S \cdot 2\Delta \mathsf{sk_i}} =x^{4\Delta^2 d}\pmod {N}$. 
+
+\paragraph{Verification of signature} To verify the signature $w$ using the public key $\mathsf{pk}=e$, it is suffice to check whether $w^e=x^{4\Delta^2}\pmod{N}$ holds. 
 
 
 \subsection{Schnorr Threshold Signatures}
 
 \subsection{BLS Threshold Signatures}
+BLS threshold signatures are widely used in real-world applications. This subsection presents the BLS threshold signature initially proposed by Boldyreva \cite{DBLP:conf/pkc/Boldyreva03}, based on the BLS signature scheme. 
 
 \subsection{Multi Signatures}
 

@@ -63,6 +63,17 @@ ElGamal signature scheme is based on algebraic properties of modular exponentiat
 \subsubsection{BLS Signature}
 BLS digital signature was proposed by Boneh, Lynn and Shacham \cite{DBLP:journals/joc/BonehLS04}, using a bilinear pairing for verification. It is provably secure (existentially unforgeable under adaptive chosen-message attacks) in the random oracle model assuming the intractability of the computational Diffie-Hellman problem in a gap Diffie-Hellman group. 
 
+\paragraph{Diffie-Hellman Problems and Gap-Diffie-Hellman groups} Let $G$ be a multiplicative group of the prime order $p$. We consider the following two problems in $G$:
+\begin{definition} Computational Diffie-Hellman (CDH) problem. 
+    Given $(g, u, v)$, three random elements of $G$, to compute $h=g^{\log_g u \log_g v}$. 
+\end{definition}
+
+\begin{definition} Decisional Diffie-Hellman (DDH) problem. 
+    Given $(g, u, v, h)$, four elements of $G$, which with equal probability can be either all random elements of $G$ or have the property that $\log_g u = \log_v h$, to output $0$ in the former case and $1$ in the latter case. 
+\end{definition}
+
+Gap-Diffie-Hellman (GDH) groups are groups where CDH problem is hard but DDH problem is easy. A series of works on the Weil pairing showed the existence of such GDH groups~\cite{DBLP:conf/crypto/BonehF01}. 
+
 \paragraph{Bilinear Pairing} A mapping $e: G_1\times G_2\to G_T$ is a bilinear pairing for groups $(G_1, G_2, G_T)$ of prime order $q$, if $e(g^x, h^y) = e(g, h)^{xy}$ for generators $g$ of $G_1$ and $h$ of $G_2$. Bilinear pairings allow efficiently solving the decisional Diffie-Hellman problem even though the computational Diffie-Hellman problem remains intractable. For a CDH problem instance $(g, g^x, g^y, g^z)$, testing $g^z=g^{xy}$ is equivalent to checking $e(g^x, g^y) = e(g, g^z)$, for a non-degenerate, efficiently computable bilinear mapping from $G\times G$ to a target group $G_T$. 
 
 \paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in G$. 
@@ -74,7 +85,7 @@ BLS digital signature was proposed by Boneh, Lynn and Shacham \cite{DBLP:journal
 \subsection{Shamir Secret Sharing and Lagrange Interpolation}
 How to share a secret $s$ among $n$ players such that any subset of at least $t$ players can collaborate to recover $s$ but no subset of fewer than $t$ players can recover $s$ or gain any information about $s$? Each player $i$ should receive a piece of data that is called a share $s_i$ of the secret $s$. The person that owns $s$ and shares it is called the \textbf{dealer}. Shamir's secret sharing is an elegant solution for this problem, that uses the property of univariate polynomials of bounded degrees. 
 
-\paragraph{Construction of Shamir's Secret Sharing} In order to share a secret $s$, the dealer chooses a random polynomial of degree at most $t-1$, $f(X)=\sum_{i=0}^{t-1} a_i X^i$, by setting $a_0=s$ and choosing all other coefficients $a_i(1\le i\le t-1)$ independently at random. The secret share for player $i$ is $s_i = f(i)$. The secret is $s=f(0)$. 
+\paragraph{Construction of Shamir's Secret Sharing} In order to share a secret $s$, the dealer chooses a random polynomial of degree at most $t-1$ over a field $\mathbb{F}$, $f(X)=\sum_{i=0}^{t-1} a_i X^i$, by setting $a_0=s\in \mathbb{F}$ and choosing all other coefficients $a_i(1\le i\le t-1)$ independently at random from $\mathbb{F}$. The secret share for player $i$ is $s_i = f(i)$. The secret is $s=f(0)$. 
 
 \paragraph{Lagrange Interpolation} Suppose a group of $t$ players want to jointly recover the secret $s$ using their shares $\{x_{j_1}, x_{j_2},\dots, x_{j_t}\}$. Let $J = \{j_1, j_2, \dots, j_t\}$. They can interpolate a polynomial of degree at most $t-1$ that passes the points $\{(j_1, x_{j_1}), (j_2, x_{j_2}), \dots (j_t, x_{j_t})\}$ as
 \begin{equation*} 
