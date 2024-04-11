@@ -1,3 +1,5 @@
+\section{Cryptography Preliminaries and Digital Signatures} \label{sec:basic}
+
 \subsection{Digital Signatures}
 
 \begin{definition}{(\textbf{Digital Signature Scheme})} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
@@ -47,13 +49,13 @@ ElGamal signature scheme is based on algebraic properties of modular exponentiat
 
 \subsubsection{Schnorr Signature}
 
-\paragraph{Parameters} All users of the signature scheme agree on a group $G$ of prime order $q$, with generator $g$. All users also agree on a cryptographic hash function $H:\{0,1\}^*\to \mathbb{Z}_q$. 
+\paragraph{Parameters} All users of the signature scheme agree on a group $\mathbb{G}$ of prime order $q$, with generator $g$. All users also agree on a cryptographic hash function $H:\{0,1\}^*\to \mathbb{Z}_q$. 
 
 \paragraph{Schnorr Group} Usually Schnorr signatures use a particular class of groups called Schnorr groups. A \textbf{Schnorr group} is a large prime-order subgroup of $\mathbb{Z}_p^{\times}$, the multiplicative group of integers modulo $p$ for some prime $p$. To generate such a group, generate two prime numbers $p, q (p>q)$, such that $p=qr+1$ for an integer $r$. Then choose any $h$ in the range $1<h<p$ such that $h^r\not\equiv 1$. $g=h^r\bmod p$ is a generator of a subgroup of $\mathbb{Z}_p^\times$ of order $q$. 
 
 \paragraph{Digital Signature Algorithm (DSA)} DSA is a variant of ElGamal signature scheme using Schnorr groups instead of the multiplicative groups $\mathbb{Z}_p^\times$. 
 
-\paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in G$. 
+\paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in \mathbb{G}$. 
 
 \paragraph{Signing} To sign a message $m$ using the secret key $x$, choose a random $k$ from $Z_q^\times$, let $r=g^k$, compute $e=H(r||m)$, where $||$ denotes concatenation of bit strings. Let $s=k-xe$, the signature is the pair $(s,e)$. Note that $s, e\in Z_q^\times$. 
 
@@ -63,41 +65,104 @@ ElGamal signature scheme is based on algebraic properties of modular exponentiat
 \subsubsection{BLS Signature}
 BLS digital signature was proposed by Boneh, Lynn and Shacham \cite{DBLP:journals/joc/BonehLS04}, using a bilinear pairing for verification. It is provably secure (existentially unforgeable under adaptive chosen-message attacks) in the random oracle model assuming the intractability of the computational Diffie-Hellman problem in a gap Diffie-Hellman group. 
 
-\paragraph{Diffie-Hellman Problems and Gap-Diffie-Hellman groups} Let $G$ be a multiplicative group of the prime order $p$. We consider the following two problems in $G$:
+\paragraph{Diffie-Hellman Problems and Gap-Diffie-Hellman groups} Let $\mathbb{G}$ be a multiplicative group of the prime order $p$. We consider the following two problems in $\mathbb{G}$:
 \begin{definition} Computational Diffie-Hellman (CDH) problem. 
-    Given $(g, u, v)$, three random elements of $G$, to compute $h=g^{\log_g u \log_g v}$. 
+    Given $(g, u, v)$, three random elements of $\mathbb{G}$, to compute $h=g^{\log_g u \log_g v}$. 
 \end{definition}
 
 \begin{definition} Decisional Diffie-Hellman (DDH) problem. 
-    Given $(g, u, v, h)$, four elements of $G$, which with equal probability can be either all random elements of $G$ or have the property that $\log_g u = \log_v h$, to output $0$ in the former case and $1$ in the latter case. 
+    Given $(g, u, v, h)$, four elements of $\mathbb{G}$, which with equal probability can be either all random elements of $\mathbb{G}$ or have the property that $\log_g u = \log_v h$, to output $0$ in the former case and $1$ in the latter case. 
 \end{definition}
 
 Gap-Diffie-Hellman (GDH) groups are groups where CDH problem is hard but DDH problem is easy. A series of works on the Weil pairing showed the existence of such GDH groups~\cite{DBLP:conf/crypto/BonehF01}. 
 
-\paragraph{Bilinear Pairing} A mapping $e: G_1\times G_2\to G_T$ is a bilinear pairing for groups $(G_1, G_2, G_T)$ of prime order $q$, if $e(g^x, h^y) = e(g, h)^{xy}$ for generators $g$ of $G_1$ and $h$ of $G_2$. Bilinear pairings allow efficiently solving the decisional Diffie-Hellman problem even though the computational Diffie-Hellman problem remains intractable. For a CDH problem instance $(g, g^x, g^y, g^z)$, testing $g^z=g^{xy}$ is equivalent to checking $e(g^x, g^y) = e(g, g^z)$, for a non-degenerate, efficiently computable bilinear mapping from $G\times G$ to a target group $G_T$. 
+\paragraph{Bilinear Pairing} A mapping $e: \mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$ is a bilinear pairing for groups $(\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T)$ of prime order $q$, if $e(g^x, h^y) = e(g, h)^{xy}$ for generators $g$ of $\mathbb{G}_1$ and $h$ of $\mathbb{G}_2$. Bilinear pairings allow efficiently solving the decisional Diffie-Hellman problem even though the computational Diffie-Hellman problem remains intractable. For a CDH problem instance $(g, g^x, g^y, g^z)$, testing $g^z=g^{xy}$ is equivalent to checking $e(g^x, g^y) = e(g, g^z)$, for a non-degenerate, efficiently computable bilinear mapping from $\mathbb{G}\times \mathbf{G}$ to a target group $\mathbb{G}_T$. 
 
-\paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in G$. 
+\paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in \mathbb{G}$. 
 
 \paragraph{Signing} The signature for message $m$ is $\sigma=H(m)^x$ using the secret key $x$.  
 \paragraph{Verification} To verify that $\sigma$ is the signature of $m$ using the public key $y$, the verifier checks that $e(\sigma, g) = e(H(m), y)$. 
 
+\subsubsection{EdDSA}
 
-\subsection{Shamir Secret Sharing and Lagrange Interpolation}
+\subsection{Secret Sharing}
+\subsubsection{Shamir Secret Sharing and Lagrange Interpolation}
 How to share a secret $s$ among $n$ players such that any subset of at least $t$ players can collaborate to recover $s$ but no subset of fewer than $t$ players can recover $s$ or gain any information about $s$? Each player $i$ should receive a piece of data that is called a share $s_i$ of the secret $s$. The person that owns $s$ and shares it is called the \textbf{dealer}. Shamir's secret sharing is an elegant solution for this problem, that uses the property of univariate polynomials of bounded degrees. 
 
 \paragraph{Construction of Shamir's Secret Sharing} In order to share a secret $s$, the dealer chooses a random polynomial of degree at most $t-1$ over a field $\mathbb{F}$, $f(X)=\sum_{i=0}^{t-1} a_i X^i$, by setting $a_0=s\in \mathbb{F}$ and choosing all other coefficients $a_i(1\le i\le t-1)$ independently at random from $\mathbb{F}$. The secret share for player $i$ is $s_i = f(i)$. The secret is $s=f(0)$. 
 
-\paragraph{Lagrange Interpolation} Suppose a group of $t$ players want to jointly recover the secret $s$ using their shares $\{x_{j_1}, x_{j_2},\dots, x_{j_t}\}$. Let $J = \{j_1, j_2, \dots, j_t\}$. They can interpolate a polynomial of degree at most $t-1$ that passes the points $\{(j_1, x_{j_1}), (j_2, x_{j_2}), \dots (j_t, x_{j_t})\}$ as
+\paragraph{Lagrange Interpolation} Suppose a group of $t$ players want to jointly recover the secret $s$ using their shares $\{x_{j_1}, x_{j_2},\dots, x_{j_t}\}$. Let $S = \{j_1, j_2, \dots, j_t\}$. They can interpolate a polynomial of degree at most $t-1$ that passes the points $\{(j_1, x_{j_1}), (j_2, x_{j_2}), \dots (j_t, x_{j_t})\}$ as
 \begin{equation*} 
-    g(x) = \sum_{k=1}^{t}\frac{\prod_{l \in J\setminus \{j_k\} } (x - l)}{\prod_{l \in J\setminus \{j_k\} } (j_k - l)}\cdot x_{j_k}   
+    g(x) = \sum_{k=1}^{t}\frac{\prod_{l \in S\setminus \{j_k\} } (x - l)}{\prod_{l \in S\setminus \{j_k\} } (j_k - l)}\cdot x_{j_k}   
 \end{equation*}
 
-\par Then $g$ is exactly the same polynomial as $f$, because they both have degree at most $t-1$ and they evaluate the same at $t$ different locations. Hence, the secret $s$ is computed as $g(0)$. Denote by $L_{J, j_k}(x) = \frac{\prod_{l \in J\setminus \{j_k\} } (x - l)}{\prod_{l \in J\setminus \{j_k\} } (j_k - l)}$, called the Lagrange multiplier of $j_k$ for the interpolation set $J$. It is interesting to see that $L_{J, j_k}(0)$ only depends on the interpolation set $J$, but not on the values of $f$ in these points.  
+\par Then $g$ is exactly the same polynomial as $f$, because they both have degree at most $t-1$ and they evaluate the same at $t$ different locations. Hence, the secret $s$ is computed as $g(0)$. Denote by $L_{S, j_k}(x) = \frac{\prod_{l \in S\setminus \{j_k\} } (x - l)}{\prod_{l \in S\setminus \{j_k\} } (j_k - l)}$, called the Lagrange multiplier of $j_k$ for the interpolation set $S$. It is interesting to see that $\lambda_{S, j_k} = L_{S, j_k}(0)$ only depends on the interpolation set $S$ and $j_k$, but not on the values of $f$ in these points.  
 
 For any group of at most $t-1$ players, they only know at most $t-1$ evaluations of the polynomial $f$, so $s$ can be an arbitrary value in the allowed range. Shamir secret sharing is an important building block of many threshold signature schemes. 
 
-\paragraph{(Publicly) Verifiable Secret Sharing} If the dealer is required to prove that the shares are distributed correctly and signers are required to prove that they help reconstruct correctly, the variant of secret sharing is called verifiable secret sharing (VSS). If the proofs can be non-interactive and publicly verified by external parties, then it is called publicly verifiable secret sharing (PVSS). 
+\subsubsection{(Publicly) Verifiable Secret Sharing} 
+If the dealer is required to prove that the shares are distributed correctly and signers are required to prove that they help reconstruct correctly, the variant of secret sharing is called verifiable secret sharing (VSS). If the proofs can be non-interactive and publicly verified by external parties, then it is called publicly verifiable secret sharing (PVSS). In the setting of distributed key generation in threshold signature schemes, as long as the participants of the system believe that the protocols are executed correctly, they can proceed to generate signatures. Therefore, only VSS is required. We introduce the VSS proposed by Pedersen~\cite{DBLP:conf/crypto/Pedersen91}. 
+
+Before presenting Pedersen's VSS, we introduce commitment schemes. Intuitively, commitment scheme allows a player to commits to a number but keep the number itself secret. 
+
+\begin{definition} 
+    (Commitment Schemes)
+    A \textbf{commitment scheme} for input space $\mathcal{X}$ and commitment space $\mathcal{Y}$ consists of two disjoint stages: the \textbf{commit} stage followed by the \textbf{reveal} stage. In the \textbf{commit} stage, the person who wants to make a commitment about a value $x\in\mathcal{X}$, say Alice, can choose a random number $r\in\{0,1\}^\lambda$ and efficiently compute the commitment $c\in\mathcal{Y}$ as the output of a function $\mathsf{commit}$, given $x$ and $r$ as input. Then Alice can send the commitment $c$ to a receiver, say Bob. Later in the \textbf{reveal} stage, Alice can open the commitment by sending $x$ and $r$ to Bob. Bob computes $c'=\mathsf{commit}(x,r)$ and accepts $x$ as the committed value if $c=c'$. 
+\end{definition}
+
+A commitment scheme is generally required to satisfy \textbf{hiding} and \textbf{binding} properties with a security parameter $\lambda$. 
+
+\begin{itemize}
+    \item \textbf{hiding}: $c$ reveals no information about $x$. Formally, for any $x\in \mathcal{X}$, for any probabilistic polynomial time (PPT) algorithm $\mathcal{A}$, $Pr[c\leftarrow \mathsf{commit}(x, r), \mathcal{A}(c)=x]=negl(\lambda)$. 
+    \item \textbf{binding}: it is computationally infeasible to find two different pairs $(x,r)$ and $(x', r')$ such that $\mathsf{commit}(x, r)=\mathsf{x', r'}$ while $x\neq x'$ or $r\neq r'$. Formally, for any PPT algorithm $\mathcal{A}'$, $Pr[(x', r')\leftarrow \mathcal{A}'(x, r), (x',r')\neq (x,r), \mathsf{commit}(x,r)=\mathsf{commit}(x',r')]=negl(\lambda)$. 
+\end{itemize}
+
+\paragraph{Pedersen Commitment Scheme} In a group $G$ of prime order $p$, choose element $g\in G$ and $h\in G$ such that nobody knows $\log_g h$. The $\mathsf{commit}$ function is defined as $\mathsf{commit}(x,r) = g^x h^r$, for a random number $r$ chosen by the committer from $\mathbb{Z}_p$ at random. Interested readers can refer to \cite{DBLP:conf/crypto/Pedersen91} for the proof that this commitment scheme satisfies the hiding and binding properties. 
+
+Pedersen's VSS consists of the following rounds:
+
+\begin{enumerate}
+    \item The dealer publishes a commmitment to the secret $x: \mathsf{commit}(x, r)$, for a randomly chosen $r\in\mathbb{Z}_p$. 
+    \item Like Shamir's secret sharing, the dealer chooses a polynomial $f\in \mathbb{Z}_q[x]$ of degree at most $t-1$ satisfying $f(0)=x$, and computes $x_i=f(i)$ for $i\in\{1,2,\dots, n\}$. Let $f(x) = x_0 + a_1 x + \cdots + a_{t_1} x^{t-1}$. Besides, the dealer also commits to the coefficients $a_i$ for all $i\in\{1,\dots, t-1\}$, by choosing $g_i\in \mathbb{Z}_q$ at random and broadcasting $c_i\mathsf{commit}(a_i, g_i)$. 
+    \item Let $g(x)=r + g_1 x + \cdots + g_{t-1}x^{t-1}$, and let $u_i=g(i)$ for $i\in\{1,2,\dots, n\}$. Then the dealer sends $(x_i, u_i)$ secretly to participant $P_i$ for $i\in\{1,2,\dots, n\}$. 
+\end{enumerate}
+
+When $P_i$ receives his share $(s_i, t_i)$, he verifies that 
+\begin{equation*}
+    \mathsf{commit}(x_i, u_i) = \prod_{j=0}^{t-1} c_i^{i^j}
+\end{equation*}  
+
+{\color{red} TODO write some proof here}
+
+
+
 
 \subsection{Adaptive Security}
 
+
 \subsection{SNARKs}
+While secret sharing, a relatively simple cryptographic primitive, is sufficient for succinct threshold signatures (see constructions in section \ref{sec:threshold}), extensions of threshold signatures usually require more than secret sharing. For unweighted threshold signatures (in section \ref{sec:weighted}) and aggregated signatures (in subsection \ref{subsec:aggregate}), SNARK is a useful cryptographic primitive~\cite{DBLP:conf/ccs/DasCXNB023}. SNARK stands for \textit{Succinct Non-interactive ARgument of Knowledge}. This subsection firstly introduce SNARK briefly and then define it. 
+
+\paragraph{quick introduction of SNARK} SNARK is motivated in the verifiable computation setting. Suppose a person, Alice, wants to evaluate a function $f:\{0,1\}^{s}\to \{0,1\}^t$ on an input $x\in \{0,1\}^s$. However she does not want to do the computation herself. Therefore, Alice asks another person, Bob, to compute $f(x)$ for her. After a while, Bob tells Alice the result is $y$. Alice does not trust Bob and wants to verify if $y$ is really $f(x)$. If verificating $y=f(x)$ is easier than evaluating $f(x)$, Alice can reduce her own workload. Informally, SNARK allows Bob to succinctly argue that $y=f(x)$. 
+
+\paragraph{Arithmetic circuit} For a field $\mathbb{F}$, an $\mathbb{F}$-\textit{arithmetic circuit} takes inputs that are elements in $\mathbb{F}$, and outputs elements in $\mathbb{F}$. We can natually use an arithmetic circuit to implement the function $f$ that Alice wants to evaluate. 
+
+\paragraph{Circuit Satisfiability Problem} While it is feasible to design an argument system for the arithmetic circuit of $f$, the argument might not be succinct. Therefore, usually we first transform the problem of checking circuit evaluation $y=f(x)$ to the circuit satisfiability problem, such that $y=f(x)\iff \exists w, C(x, w)=y$. $w$ is called a \textit{witness} that the prover should find for a new verification circuit $C$. Particularly, we can also design a circuit $C'$ from $C$ such that $C(x,w)=y\iff C'((x,y), w)=0$, treating both $x$ and $y$ as input in $C'$.  Modern snarks are mostly designed for intermediate representations such as circuit satisfiability instances. 
+
+\begin{definition}
+    The \textit{arithmetic circuit satisfiability problem} of an $\mathbb{F}$-arithmetic circuit $C:\mathbb{F}^n \times \mathbb{F}^h \to \mathbb{F}^l$ is captured by the relation $\mathcal{R}_C = \{(x, w): C(x, w)=0^l\}$; its language is $\mathcal{L}_C=\{x\in \mathbb{F}^n: \exists w\in\mathbb{F}^h, (x, w)\in \mathcal{R}_C \}$.  
+\end{definition}
+
+A SNARK for circuit satisfiability problem in a field $\mathbb{F}$ is a triple of polynomial time algorithm $(\mathsf{KeyGen}, \mathsf{Prove}, \mathsf{Verify})$:
+\begin{itemize}
+    \item $\mathsf{KeyGen}(1^\lambda, C)\to (\mathsf{pk}, \mathsf{vk})$. On input a security parameter $\lambda$ and an $\mathbb{F}$-arithmetic circuit $C$, probabilistically generate a proving key $\mathsf{pk}$ and a verification key $\mathsf{vk}$. Both keys are published as public parameters, so that everyone can use them to prove or verify the membership of language $\mathcal{L}_C$. 
+    \item $\mathsf{Prove}(\mathsf{pk}, x, w)\to \pi$. On input a proving key $\mathsf{pk}$ and a valid pair $(x, w)\in \mathcal{R}_C$, the prover outputs a non-interactive proof $\pi$ for the statement $x\in \mathcal{L}_C$. 
+    \item $\mathsf{Verify}(\mathsf{vk}, x, \pi)\to b$. On input a verification key $\mathsf{vk}$, input $x$ and a proof $\pi$, the verifier outputs $b=1$ if he is convinced that $x\in \mathcal{L}_C$. 
+\end{itemize}
+
+A SNARK satisfies the following properties: 
+\begin{itemize}
+    \item Completeness: For every security parameter $\lambda$, any $\mathbb{F}$-arithmetic circuit $C$, and any $(x,a)\in\mathcal{R}_C$, the honest prover can convince the verifier. Namely, $b = 1$ with probability $1-negl(\lambda)$ in the following experiment: $(\mathsf{pk}, \mathsf{vk}) \to \mathsf{KeyGen}(1^{\lambda}, C); \pi \leftarrow \mathsf{Prove}(\mathsf{pk}, x, a); b \leftarrow \mathsf{Verify}(\mathsf{vk}, x, \pi)$.
+    \item Succinctness. An honestly generated proof $\pi$ has $O_\lambda(1)$ bits and $\mathsf{Verify}($ $\mathsf{vk},x,\pi)$ runs in time $O_\lambda(|x|)$. (Here, $O_\lambda$ hides a fixed polynomial factor in $\lambda$.)
+    \item Proof of knowledge (and soundness). If the verifier accepts a proof output by a bounded prover, then the prover “knows” a witness for the given instance. (In particular, soundness holds against bounded provers.) Namely, for every $poly(\lambda)$-size adversary $\mathcal{A}$, there is a $poly(\lambda)$-size extractor $\mathcal{E}$ such that $Verify(\mathsf{vk}, x, \pi) = 1$ and $(x, w) \in \mathcal{R}_C$ with probability $negl(\lambda)$ in the following experiment: $(\mathsf{pk}, \mathsf{vk}) \leftarrow \mathsf{KeyGen}(1^\lambda, C); (x, \pi) \leftarrow \mathcal{A}(\mathsf{pk}, \mathsf{vk}); a \leftarrow \mathcal{E}(\mathsf{pk}, \mathsf{vk})$.
+\end{itemize}

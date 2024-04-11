@@ -1,0 +1,15 @@
+\section{Succinct Weighted Threshold Signatures} \label{sec:weighted}
+
+In the threshold signature schemes introduced in section \ref{sec:threshold}, every signer has the same unit weight. These schemes have constant signature size and verification key size, constant verification time. When we consider the application of voting in cryptocurrencies, different participants have different amounts of influence on the voting result. In Proof-of-Stake, the weight of a user is proportional to the amount of coins that he deposits as his stake. 
+
+\paragraph{Simple Solution} A simple solution is to allow a user with a large weight to control multiple signers. In other words, it uses a \textit{virtualization} of threshold signature schemes. For example, in a system of 3 users, $U_1$ with a weight $1$, $U_2$ with a weight $2$ and $U_3$ with a weight $3$. The resulting threshold system consists of $6$ signers $\{P_1,P_2,\dots, P_6\}$. $U_1$ controls $S_1=\{P_1\}$, by owning the secret share of $P_1$. $U_2$ controls $S_2 = \{P_2,P_3\}$, while $U_3$ controls $S_3 = \{P_4, P_5, P_6\}$. Whenever a user wants to help create a signature, he asks all signers that he controls to participate the signing protocol. The simple solution is undesirable in PoS cryptocurrencies, because the stake (hence the weights) of accounts differ a lot. The "richest" account might possess more than $10^8$ times of another account. Then one rich account alone occupies at least $10^8$ secret key shares in the threshold signature scheme, which makes the virtualization solution practically infeasible. 
+
+
+\paragraph{Sampling-based approach} To reduce the complexity of the aforementioned virtualization approach, Chaidos and Kiayias present a sampling based weighted threshold signature scheme~\cite{DBLP:journals/iacr/ChaidosK21}. The idea is to sample a subset of signers according to the weight distribution and let the sampled signers join an unweighted threshold signature scheme. However, sampling random subsets avoids the problem of designing efficient weighted threshold signature scheme rather then solves the problem. It introduces sampling bias, such that the actual threshold is not exact. \cite{DBLP:conf/ccs/DasCXNB023} further argues that the sampling-based approach requires a secure sample mechanism and is typically vulnerable to adaptive corruption. 
+
+\paragraph{Weighted Secret Sharing} Another approach is to modify the secret sharing part in unweighted threshold signature schemes to accommodate the weighted setting. Generic weighted secret sharing (WSS) was first characterized by Beimel~\cite{DBLP:conf/tcc/BeimelTW05} and require that the share size of a signer is sublinear in his weight. Subsequent works develop more WSS schemes, such as \cite{DBLP:conf/crypto/GargJMSWZ23}. However, these schemes have undesirable concrete performance so far. 
+
+\subsection{}
+
+\paragraph{SNARKs} SNAKRs allow efficiently verifying a general class of computation and are suitable solutions for weighted threshold signatures. 
+

@@ -1,3 +1,5 @@
+\section{Classical Threshold Signatures} \label{sec:threshold}
+
 This section formally defines threshold signatures and introduces a few classical constructions of threshold signatures. 
 \subsection{Definition}
 Threshold signature scheme involves $n$ signers. The typical setting is that any group of $t (1<t\le n)$ signers can collaborate to create a signature for a message $m$. However, any group of fewer than $t$ signers cannot create a signature for any messages. $t$ is the threshold. Each of the $n$ signers only possesses a share of the secret key, while one public key exists that can verify the validity of signatures. 
@@ -14,7 +16,7 @@ Threshold signature scheme involves $n$ signers. The typical setting is that any
     \end{itemize}
 \end{definition}
 
-\paragraph{Trusted or Distributed Key Generation} Usually the signers cannot choose their own secret key shares independently as if choosing a random secret key in single signer digital signature schemes. They have to collaborate to generate the secret key shares. To make sure that a secret key share of a signer is kept secret against other signers, we have to either assume a trusted third party acts as the dealer that distributes the shares to signers, or design a distributed protocol to securely generate the secret key shares. In this survey, we can assume that there are feasible solutions for distributed key generation.  
+\paragraph{Trusted or Distributed Key Generation} Usually the signers cannot choose their own secret key shares independently as if choosing a random secret key in single signer digital signature schemes. They have to collaborate to generate the secret key shares. To make sure that a secret key share of a signer is kept secret against other signers, we have to either assume a trusted third party acts as the dealer that distributes the shares to signers, or design a distributed protocol to securely generate the secret key shares. We delay the introduction of DKG protocols to section \ref{sec:dkg}. In this section, we can assume that there are feasible solutions for distributed key generation.  
 
 \paragraph{Interaction} In the $\mathsf{Sig}$ phase, $t$ signers might interact with each other. Some threshold signature schemes are interactive and others are non-interactive. Depending on the application scenarios, we might allow interaction among signers. In other cases, it is unrealistic for signers to interact with each other. In non-interactive threshold signature schemes, each signer $i$ generates a partial signature $\sigma_i$ for the message $\mathsf{m}$ using the secret key $\mathsf{sk_i}$. 
 
@@ -53,12 +55,53 @@ The purpose of $\Delta$ is to make sure $\lambda_{i, j}^S$ are integers. Then, w
 
 
 \subsection{Schnorr Threshold Signatures}
+Schnorr threshold signatures are based on single-party schnorr signature scheme. It is one of the popular practical threshold signature schemes, due to its simplicity. We firstly informally sketch the challenge of extending Schnorr signatures to threshold cryptosystem. Recall that Schnorr signature requires a signer to create a random number $k$ for one signature in the exponent. In the case where multiple signers create different random numbers, since the reconstruction phase of Shamir secret sharing requires addition operation on the secret shares, signers must achieve some consensus on the random numbers. Therefore, Schnorr threshold signature schemes usually require a few rounds of interaction among the signers to produce a valid signature. We introduce $\mathsf{Sparkle}$, a simple three-round threshold signature scheme presented in \cite{DBLP:conf/crypto/CritesKM23}.
+
+\paragraph{Setup and Key Generation} The public parameters include a security parameter $1^\lambda$, a group $\mathbb{G}$ with a generator $g$ of prime order $p$, two hash function $\mathsf{H_{cm}}, \mathsf{H_{sig}}: \{0,1\}^\ast \to \mathbb{Z}_p$. The secret key $\mathsf{sk}=x$ is generated from $\mathbb{Z}_p$ and the corresponding public key is $\mathsf{pk}=y:=g^x$. The secret key shares are Shamir secret shares of $x$ among the $n$ signers with a threshold $t$. Signer $i$ receivers $\mathsf{sk_i}=x_i$. 
+
+\paragraph{Signing Round 1} ($\mathsf{Sign}$) On input a message $m$ and a signing set $S$, each participant $i\in S$ samples a random number $r_i$ from $\mathbb{Z}_p$, computes $R_i=g^{r_i}$ and $\mathsf{cm}_i=\mathsf{H_{cm}}(m, S, R_i)$, and outputs their commitment $\mathsf{cm}_i$. 
+
+\paragraph{Signing Round 2} ($\mathsf{Sign'}$) On input commitments $\{\mathsf{cm}_j\}_{j\in S}$, each participant $i\in S$ outputs their nonce $R_i$. 
+
+\paragraph{Signing Round 3} ($\mathsf{Sign''}$) On input nonces $\{R_j\}_{j\in S}$, each participant $i\in S$ first checks that the commitments received in the first round are valid, i.e., $\mathsf{cm}_j=\mathsf{H_{cm}}(m, S, R_j)$ for all $j\ in S$. If not, return $\perp$. Else, each participant computes the aggregate nonce $\tilde{R} = \prod_{j\in S} R_j$, $c=\mathsf{H_{sig}}(y, m, \tilde{R})$, and partial signature $z_i = r_i + c\lambda_{S,i} x_i$, where $\lambda_{S,i}$ is the Lagrange coefficient for participant $i$ with respect to signing set $S$. Each participant outputs $z_i$. 
+
+\paragraph{Combining Signatures} On input nonces $\{R_j\}_{j\in S}$ and partial signatures $\{z_j\}_{j\in S}$, the combiner computes $\tilde{R}=\prod_{j\in S} R_j$ and $z=\sum_{j\in S} z_j$, and outputs the signature $\sigma=(\tilde{R}, z)$. 
+
+\paragraph{Verification} On input the joint public key $\mathsf{pk}=y$, a message $m$, and a purported signature $\sigma=(\tilde{R}, z)$, the verifier computes $c=\mathsf{H_{sig}}(y, m, \tilde{R})$, and accepts if $\tilde{R}y^c=g^z$. 
+
+\paragraph{Security} \cite{DBLP:conf/crypto/CritesKM23} proves that $\mathsf{Sparkle}$ is secure under $t-1$ adaptive corruptions, under the one-more discrete log asssumption (AOMDL) in algebraic group models (AGM) and random oracle models (ROM).  
 
 \subsection{BLS Threshold Signatures}
-BLS threshold signatures are widely used in real-world applications. This subsection presents the BLS threshold signature initially proposed by Boldyreva \cite{DBLP:conf/pkc/Boldyreva03}, based on the BLS signature scheme. 
+BLS threshold signatures are also widely used in real-world applications. In comparison to Schnorr threshold signatures, the signing algorithm of BLS signature scheme does not relies on local secret randomness, so the signers can delegate the task of combining partial signatures to any person and avoid the interaction among signers. This subsection presents the first BLS threshold signature initially proposed by Boldyreva \cite{DBLP:conf/pkc/Boldyreva03}, based on the BLS signature scheme. 
+
+\paragraph{Setup and Key Generation} The setup and key generation steps are similar to Schnorr threshold signatures. However, BLS threshold signatures work under gap Diffie-Hellman assumption and require a bilinear pairing $e:\mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$. 
+
+\paragraph{Generating Partial Signatures} ($\mathsf{PartialSign}$) On input message $m$, a signer $i$ with secret key share $\mathsf{sk}_i = x_i$ can produce a partial signature as $\sigma_i = H(m)^{x_i}$. 
+
+\paragraph{Combining Signatures} On input partial signatures $\{\sigma_i\}_{i\in S}$ such that $|S|=t$, the combiner computes $\sigma = \prod_{i\in S} \sigma_i^{\lambda_{S, i}}$, where $\lambda_{S,i}$ is the Lagrange coefficient that only depends on the signer set $S$ and every signer index $i$. 
+
+\paragraph{Verification} On input a signature $\sigma$, a message $m$ and a public key $y=g^x$, the verifier accepts if $e(H(m), y) = e(\sigma, g)$. If the signature is valid, then $\sigma = H(m)^{\sum_{i\in S} \lambda_{S, i} \cdot x_i} = H(m)^x$. 
+
 
 \subsection{Multi Signatures}
 
-\subsection{Aggregators}
+\subsection{Aggregate Signatures} \label{subsec:aggregate}
+In threshold signatures, a group of $n$ signers try to create signatures for one common message $m$. Aggregate signatures consider the problem of aggregating $n$ signatures of $n$ different messages into a short signature. 
 
-\subsection{Weighted Threshold Signatures}
+\subsection{BGLS Aggregate Signatures} \cite{DBLP:conf/eurocrypt/BonehGLS03} presents an aggregate signature scheme based on bilinear pairing. Their construction yields a constant size aggregated signature. 
+
+\paragraph{Setup} The setup is similar to BLS signatures for $n$ disjoint signers. Choose a bilinear pairing $e:\mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$, where the base groups $\mathbb{G}_1$ and $\mathbb{G}_2$ have prime order $p$ with generators $g_1$ and $g_2$ respectively. Every signer $i$ has a secret key $x_i\in \mathbb{Z}_p$ and the corresponding public key is $y_i = g_2^{x_i}\in \mathbb{G}_2$. All the public keys $y_i$ are publicly known. 
+
+\paragraph{Signing} Each signer $i$ uses his secret key $x_i$ to sign a message $m_i$. The output is a BLG signature $\sigma_i = H(m)^{x_i}\in \mathbb{G}_1$.  
+
+\paragraph{Aggregation} Upon receiving messages $\{m_i\}_{i\in S}$ and signatures $\{\sigma_i\}_{i\in S}$ from the aggregation subset of signers $S={s_1, s_2,\dots, s_k}$, the aggregator makes sure that the $k$ messages are distinct and computes $\sigma=\prod_{i=S} \sigma_i \in \mathbb{G}_1$. 
+
+\paragraph{Aggregate Verification} Given a signer set $S$, the set of messages $\{m_i\}_{i\in S}$, the set of signatures $\{\sigma_i\}_{i\in S}$ and the public keys $\{y_i\}_{i\in S}$, the verifier accepts if 1) the messages are distinct and 2) $e(\sigma, g_2)=\prod_{i\in S}e(H(m_i), y_i)$. If the signature is valid, the second condition should satisfy because 
+\begin{equation*}
+    e(\sigma, g_2) = e(\prod_{i\in S}H(m_i)^{x_i}, g_2) = \prod_{i\in S} e(H(m_i), g_2)^{x_i} = \prod_{i\in S}e(H(m_i), g_2^{x_i}) %= \prod_{i\in S} e(H(m_i), y_i) 
+\end{equation*}
+{\color{red} TODO add some proof}
+
+\paragraph{Efficiency} Although the size of aggregate signature is only constant, the verifier still has to spend $\Theta(n)$ time. {\color{red} TODO mention the application of SNARKs later}
+
+

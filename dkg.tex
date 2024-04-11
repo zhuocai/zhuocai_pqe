@@ -1,0 +1,10 @@
+\section{Distributed Key Generation} \label{sec:dkg}
+
+To deploy the threshold signature schemes in the distributed settings, such as in cryptocurrency applications, it is desirable to setup the public parameters and send the secret shares without trusting any third-party dealer. Instead, we prefer to share the secret using a distributed protocol, under a series of works on Distributed Key Generation (DKG). 
+
+Shortly after threshold cryptosystems were proposed in the late 1980s~\cite{DBLP:conf/crypto/DesmedtF89}, early DKG protocols were developed~\cite{DBLP:conf/eurocrypt/Pedersen91a}. 
+
+Before introducing theses DKG protocols, we briefly sketch the ideas. With verifiable secret sharing, the participants can guarantee that the shares are correct and consistent, when someone shares a secret. However, they cannot simply ask one of the signers to take the role of the leader that chooses a secret by himself and share with others. The signers do not want anyone to know the secret $x$, and want to keep their own shares secret from all others. What if multiple signers jointly create this secret $x$? For example, signer $1$ and signer $2$ choose local secrets $a$ and $b$ respectively, then they share their secrets among all signers. Every signer $i$ receives $a_i$ and $b_i$. $a+b$ becomes a good secret such that every signer $i$ knows its share $a_i+b_i$, and this share of signer $i$ is unknown to others, as long as signer $1$ and $2$ do not collude with each other. 
+
+\subsection{Pedersen's DKG}
+
