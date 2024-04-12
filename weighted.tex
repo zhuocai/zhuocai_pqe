@@ -9,7 +9,33 @@ In the threshold signature schemes introduced in section \ref{sec:threshold}, ev
 
 \paragraph{Weighted Secret Sharing} Another approach is to modify the secret sharing part in unweighted threshold signature schemes to accommodate the weighted setting. Generic weighted secret sharing (WSS) was first characterized by Beimel~\cite{DBLP:conf/tcc/BeimelTW05} and require that the share size of a signer is sublinear in his weight. Subsequent works develop more WSS schemes, such as \cite{DBLP:conf/crypto/GargJMSWZ23}. However, these schemes have undesirable concrete performance so far. 
 
-\subsection{}
+\paragraph{SNARK} SNAKRs allow efficiently verifying a general class of computation and are suitable solutions for weighted threshold signatures. Recall that SNARKs can generate a proof of $O_\lambda(1)$ size and $O_\lambda(|x|)$verification time for a circuit satisfiability problem $\exists w\in\{0,1\}^{k_w}, C(x, w)=0^{k_y}$. The most important goal is to allow anyone to efficiently verify that a threshold signature is valid or not. Therefore, we should reduce the size of $x$ as much as possible. If $|x| = O(1)$, the verification time is also constant. On the signer side, if we need $O(n)$ signers to generate a threshold signature, at least $O(n)$ bits of total communication are required. Ideally we want to control the overall communication/computation to generate a threshold signature $\sigma$ to be close to the lower bound $O(n)$. These goals can be achieved by SNARKs. 
 
-\paragraph{SNARKs} SNAKRs allow efficiently verifying a general class of computation and are suitable solutions for weighted threshold signatures. 
+\subsection{Weighted Threshold Signatures from Generic SNARKs}
+\paragraph{Problem Setting} There are $n$ signers $\{P_1, P_2, \dots, P_n\}$, with weights $\{w_1,w_2,\dots, w_n\}\in \mathbb{Z}$ respectively, such that $\sum_{i=1}^n w_i = W$. Suppose we use BLS signature scheme, with a blinear pairing $e:\mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$, a hash function $H:\{0,1\}^\ast\to \mathbb{G}_1$, a generator $g_2$ of prime order $p$ in group $\mathbb{G}_2$. Each signer $P_i$ has a secret key $\mathsf{sk}_i = x_i \in \mathbb{Z}_p$ and publishes a public key $\mathsf{pk}_i = g_2^{x_i}$. Let $\mathbf{pk}$ denote the vector $[\mathsf{pk}_1,\mathsf{pk}_2,\dots, \mathsf{pk}_n]$ and $\mathbf{w}$ denote the vector $[w_1,w_2,\dots, w_n]$. We consider a session of threshold signature for a message $m$, with a threshold requirement that can be arbitrary within $(0, W]$ and might vary in different sessions. A threshold signature $\tilde{\sigma}$ is valid is $\sum_{i\in S}w_i\ge t$, where $S$ is the signer set. SNARK-based threshold signature can allow the signature creator to arbitrarily specify the overall weights $t$ of the signer set $S$, different from secret sharing based approach where the threshold is fixed before aggregation. 
 
+\paragraph{Remark about accessing the public keys} We aim to design a succinct weighted threshold signature scheme where the verification time is sublinear in $n$, the number of signers, or ideally does not grow with $n$. However, a verifier has to know all $n$ public keys. To circumvent this issue, we either (1) allow verifiers to learn these $n$ keys and possibly do preprocessing, and only care about the verification complexity for each single threshold signature after the preprocessing finishes, or (2) assume that the system is well integrated with SNARKs so that the verifier does not need to know all $n$ public keys, but has an oracle access to the public keys via a polynomial commitment scheme. From now on, we assume that the verifier knows a commitment $c_{\mathbf{pk}}$ of all public keys. Note that the commitment size $|c_{\mathbf{pk}}|$ is constant. Similarly the verifier also knows and accepts a commitment of the weightes: $c_{\mathbf{w}}$. 
+
+\paragraph{Protocol} For a message $m$, each signer $P_i$ from a signer set $S$ creates a partial signature $\sigma_i = H(m)^{x_i}\in \mathbb{G}_1$. One combiner, who can be one of the signers in $S$ or any third party, receives all partial signatures $\sigma_S = \{\sigma_i\}_{i\in S}$, checks they are valid partial sigantures using their corresponding public keys and combines all the partial signatures by producing a succinct non-interactive proof that can be verified by everyone with access to the public information $(H(m), c_{\mathbf{pk}}, c_{\mathbf{w}})$. 
+
+\paragraph{Circuit Satisfiability Problem for Weighted Threshold Signatures} Suppose the signer set is $S\subseteq \{1,2,\dots, n\}$. If  The relation that characterize a valid signature is the following:
+
+\begin{equation*}
+    \mathcal{R}_{WTS} = 
+\Bigg\{\space \begin{matrix}
+         x = (H(m), t, c_{\mathbf{pk}, c_{\mathbf{w}}}, c_{S}, c_{\sigma_{S}})\\
+         w = (\mathbf{pk}, \mathbf{w}, S, \sigma_S)\\
+    \end{matrix}\quad \Bigg| \quad \begin{matrix}
+        c_{\mathbf{pk}} = \mathsf{commit}(\mathbf{pk}), 
+        c_{\mathbf{w}} = \mathsf{commit}(\mathbf{w})\\
+        c_{S} = \mathsf{commit}(S),
+        c_{\sigma_{S}} = \mathsf{commit}(\sigma_S) \\
+        \forall i\in S, e(H(m), \mathsf{pk}_i) = e(\sigma_i, g_2) \\
+        t = \sum_{i\in S} w_i  \\
+    \end{matrix}\space \Bigg\}
+\end{equation*}
+
+\paragraph{Signature size} The generated threshold signature is $x$ and a SNARK proof that $(x,w)\in \mathcal{R}_{WTS}$. Both parts consist of $O(1)$ bits. The verification time is also constant, when using SNARKs like Groth16 and Plonk. 
+
+\subsection{Weighted Threshold Signatures from Special SNARKs}
+While generic snarks based approaches create threshold signatures with very small signature size and verification time, \cite{DBLP:conf/ccs/DasCXNB023} argues that the aggregation time (prover complexity) is too high for practical applications. To optimize the aggregation time, \cite{DBLP:conf/ccs/DasCXNB023} proposed a weighted threshold signature scheme based on pairing based Multisignature and inner product arguments (IPA). 

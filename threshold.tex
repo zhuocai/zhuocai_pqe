@@ -83,7 +83,27 @@ BLS threshold signatures are also widely used in real-world applications. In com
 \paragraph{Verification} On input a signature $\sigma$, a message $m$ and a public key $y=g^x$, the verifier accepts if $e(H(m), y) = e(\sigma, g)$. If the signature is valid, then $\sigma = H(m)^{\sum_{i\in S} \lambda_{S, i} \cdot x_i} = H(m)^x$. 
 
 
-\subsection{Multi Signatures}
+\subsection{Exotic Signatures}
+Threshold signatures involve multiple signers. There are other variants of signature scheme that also involve multiple signers but have different functionalities. Exotic signatures refer to signatures with properties beyond the norm and functionalities of digital signature schemes. They are useful in different application scenarios. 
+
+\subsubsection{Multi Signatures}
+Multi signatures are threshold signatures with the restriction that the threshold $t$ is exactly $n$. A multi signature $\sigma$ on a message $m$ is valid only if all $n$ signers contribute to $\sigma$. 
+
+Using BLS signature, suppose each signer $i$ has secret key $\mathsf{sk}_i = x_i\in \mathbb{Z}_p$ and publishes the public key $\mathsf{pk}_i = g_2^{x_i}\in \mathbb{G}_2$. On input a message $m$, the partial signature of signer $i$ is $H(m)^{x_i} \in \mathbb{G}_1$. From these partial signatures, the aggregated multisignature is defined as $\sigma = \prod_{i=1}^n \sigma_i$. The verification key for the multisignature is $\mathsf{pk} = \prod_{i=1}^n \mathsf{pk}_i$. To verify a multisignature $m$ using the verification key $\mathsf{pk}$, it suffices to check if $e(H(m), \mathsf{pk}) = e(\sigma, g_2)$. 
+
+\paragraph{Comparison with BLS threshold signature} The verifier in the multisignature scheme must knows $\mathsf{pk}$ to efficiently verify the signature. $\mathsf{pk}$ depends on the signer set. In multisignature, the signer set is fixed, so everyone can precompute $\mathsf{pk}$ only once and the amortized cost is negligible. In threshold signatures, the signer set might be any subset $S$ consisting of $t$ signers of all $n$ signers. It is imfeasible to precompute $\mathsf{pk}_S$ for any possible $S$. 
+
+\subsubsection{Group Signatures} 
+A group signature scheme allows a member of a group to anonymously sign a message on behalf of the group. For example, it can be used by an employee of a large company where a verifier only cares about whether a message was signed by an employee, but does not care about which particular employee signed it. A group signature scheme has a group manager, who is in charge of adding group members and has the ability to reveal the original signer in the event of disputes. 
+
+\subsubsection{Ring Signatures} 
+Similar to group signatures, in a ring signature scheme, any signer $i$ can generate a valid signature on behalf of the whole signer set. There is no group manager and it is computationally difficult to determine the signer even for insiders. Ring signature was proposed by Rivest, Shamir and Tauman in the name of "how to leak a secret"~\cite{DBLP:conf/asiacrypt/RivestST01}, for the application that one member wants to leak a secret of a group but keep his identity secret completely. 
+
+
+
+
+
+
 
 \subsection{Aggregate Signatures} \label{subsec:aggregate}
 In threshold signatures, a group of $n$ signers try to create signatures for one common message $m$. Aggregate signatures consider the problem of aggregating $n$ signatures of $n$ different messages into a short signature. 

@@ -8,6 +8,9 @@
 *.log
 
 *.gz
+*.toc
+
+*.sh
 
 *.DS_Store
 survey.pdf

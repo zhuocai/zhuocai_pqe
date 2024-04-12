@@ -1,14 +1,24 @@
-\documentclass[runningheads]{llncs}
+\documentclass[11pt]{article}
 %
-\usepackage[T1]{fontenc}
 % T1 fonts will be used to generate the final print and online PDFs,
 % so please use T1 fonts in your manuscript whenever possible.
 % Other font encondings may result in incorrect characters.
 %
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ left=25mm,
+ right=25mm,
+ top=34mm,
+ bottom=34mm}
+\usepackage{tocloft}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{xcolor}
+\usepackage{mathtools}
+\usepackage{array}
+
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
@@ -18,6 +28,27 @@
 %\renewcommand\UrlFont{\color{blue}\rmfamily}
 %\urlstyle{rm}
 %
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      \ifdim\lastskip<1.5em \hskip-\lastskip
+      \hskip1.5em plus0em minus0.5em \fi \nobreak
+      \vrule height0.75em width0.5em depth0.25em\fi}
+
+
 \begin{document}
 %
 \title{Threshold Signatures and Applications in Blockchains}
@@ -26,13 +57,12 @@
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{Zhuo Cai}
+\author{Zhuo Cai\\Department of Computer Science and Engineering\\Hong Kong University of Science and Technology}
 %
 % \authorrunning{F. Author et al.}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Hong Kong University of Science and Technology}
 %
 \maketitle              % typeset the header of the contribution
 %
@@ -42,26 +72,33 @@ The abstract should briefly summarize the contents of the paper in
 \end{abstract}
 %
 %
-
+\newpage
 \tableofcontents
+
+\newpage
 \input{intro.tex}
 
-
+\newpage
 \input{basic.tex}
 
-
+\newpage
 \input{threshold.tex}
 
+\newpage
 \input{dkg.tex}
 
+\newpage
 \input{weighted.tex}
 
+\newpage
 \section{Topic 1}
 \input{topic1.tex}
 
+\newpage
 \section{Topic 2}
 \input{topic2.tex}
 
+\newpage
 \section{Conclusion}
 
 

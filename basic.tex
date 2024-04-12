@@ -2,7 +2,7 @@
 
 \subsection{Digital Signatures}
 
-\begin{definition}{(\textbf{Digital Signature Scheme})} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
+\begin{definition}{(Digital Signature Scheme)} A digital signature scheme, {\sffamily SGN= (Setup, Gen, Sig, Ver)}, consists of four algorithms defined as follows: 
 \end{definition}
 \begin{itemize}
     \item $\mathsf{Setup(1^\lambda) \to par}$ takes an input the security parameter $1^\lambda$ and outputs global public parameters $\mathsf{par}$, where $\mathsf{par}$ defines public key infrastructure and domains of messages and signatures, and all related algorithms implicitly take $\mathsf{par}$ as input.  
@@ -66,11 +66,11 @@ ElGamal signature scheme is based on algebraic properties of modular exponentiat
 BLS digital signature was proposed by Boneh, Lynn and Shacham \cite{DBLP:journals/joc/BonehLS04}, using a bilinear pairing for verification. It is provably secure (existentially unforgeable under adaptive chosen-message attacks) in the random oracle model assuming the intractability of the computational Diffie-Hellman problem in a gap Diffie-Hellman group. 
 
 \paragraph{Diffie-Hellman Problems and Gap-Diffie-Hellman groups} Let $\mathbb{G}$ be a multiplicative group of the prime order $p$. We consider the following two problems in $\mathbb{G}$:
-\begin{definition} Computational Diffie-Hellman (CDH) problem. 
+\begin{definition} {(Computational Diffie-Hellman (CDH) problem)} 
     Given $(g, u, v)$, three random elements of $\mathbb{G}$, to compute $h=g^{\log_g u \log_g v}$. 
 \end{definition}
 
-\begin{definition} Decisional Diffie-Hellman (DDH) problem. 
+\begin{definition} {(Decisional Diffie-Hellman (DDH) problem)}
     Given $(g, u, v, h)$, four elements of $\mathbb{G}$, which with equal probability can be either all random elements of $\mathbb{G}$ or have the property that $\log_g u = \log_v h$, to output $0$ in the former case and $1$ in the latter case. 
 \end{definition}
 
@@ -84,6 +84,8 @@ Gap-Diffie-Hellman (GDH) groups are groups where CDH problem is hard but DDH pro
 \paragraph{Verification} To verify that $\sigma$ is the signature of $m$ using the public key $y$, the verifier checks that $e(\sigma, g) = e(H(m), y)$. 
 
 \subsubsection{EdDSA}
+In most practical digital signature schemes and more generally public key cryptosystems that rely on the hardness of discrete logarithm, we always work with a multiplicative group $\mathbb{G}$ of prime order $q$ with a generator $g\in\mathbb{G}$. In the presentation of ElGamal signature and Schnorr signature, we use a subset of integers modular a prime number $p$, i.e., we work with $\mathbb{G}\subset \mathbb{Z}_p^\times$. Modern discrete-log based cryptosystems prefer to use elliptic curves as the group, where the discrete log problem has considerably more bits of security. A popular digital signature scheme is Edwards-curve Digital Signature Algorithm (EdDSA), a variant of Schnorr signature based on twisted Edwards curves. The construction of elliptic curves is not covered in this survey. We abstract them as multiplicative groups with generators, where the discrete logarithm problem is hard. 
+
 
 \subsection{Secret Sharing}
 \subsubsection{Shamir Secret Sharing and Lagrange Interpolation}
@@ -105,8 +107,7 @@ If the dealer is required to prove that the shares are distributed correctly and
 
 Before presenting Pedersen's VSS, we introduce commitment schemes. Intuitively, commitment scheme allows a player to commits to a number but keep the number itself secret. 
 
-\begin{definition} 
-    (Commitment Schemes)
+\begin{definition}{(Commitment Schemes)}
     A \textbf{commitment scheme} for input space $\mathcal{X}$ and commitment space $\mathcal{Y}$ consists of two disjoint stages: the \textbf{commit} stage followed by the \textbf{reveal} stage. In the \textbf{commit} stage, the person who wants to make a commitment about a value $x\in\mathcal{X}$, say Alice, can choose a random number $r\in\{0,1\}^\lambda$ and efficiently compute the commitment $c\in\mathcal{Y}$ as the output of a function $\mathsf{commit}$, given $x$ and $r$ as input. Then Alice can send the commitment $c$ to a receiver, say Bob. Later in the \textbf{reveal} stage, Alice can open the commitment by sending $x$ and $r$ to Bob. Bob computes $c'=\mathsf{commit}(x,r)$ and accepts $x$ as the committed value if $c=c'$. 
 \end{definition}
 
@@ -143,14 +144,14 @@ When $P_i$ receives his share $(s_i, t_i)$, he verifies that
 \subsection{SNARKs}
 While secret sharing, a relatively simple cryptographic primitive, is sufficient for succinct threshold signatures (see constructions in section \ref{sec:threshold}), extensions of threshold signatures usually require more than secret sharing. For unweighted threshold signatures (in section \ref{sec:weighted}) and aggregated signatures (in subsection \ref{subsec:aggregate}), SNARK is a useful cryptographic primitive~\cite{DBLP:conf/ccs/DasCXNB023}. SNARK stands for \textit{Succinct Non-interactive ARgument of Knowledge}. This subsection firstly introduce SNARK briefly and then define it. 
 
-\paragraph{quick introduction of SNARK} SNARK is motivated in the verifiable computation setting. Suppose a person, Alice, wants to evaluate a function $f:\{0,1\}^{s}\to \{0,1\}^t$ on an input $x\in \{0,1\}^s$. However she does not want to do the computation herself. Therefore, Alice asks another person, Bob, to compute $f(x)$ for her. After a while, Bob tells Alice the result is $y$. Alice does not trust Bob and wants to verify if $y$ is really $f(x)$. If verificating $y=f(x)$ is easier than evaluating $f(x)$, Alice can reduce her own workload. Informally, SNARK allows Bob to succinctly argue that $y=f(x)$. 
+SNARK is motivated in the verifiable computation setting. Suppose a person, Alice, wants to evaluate a function $f:\{0,1\}^{s}\to \{0,1\}^t$ on an input $x\in \{0,1\}^s$. However she does not want to do the computation herself. Therefore, Alice asks another person, Bob, to compute $f(x)$ for her. After a while, Bob tells Alice the result is $y$. Alice does not trust Bob and wants to verify if $y$ is really $f(x)$. If verificating $y=f(x)$ is easier than evaluating $f(x)$, Alice can reduce her own workload. Informally, SNARK allows Bob to succinctly argue that $y=f(x)$. 
 
 \paragraph{Arithmetic circuit} For a field $\mathbb{F}$, an $\mathbb{F}$-\textit{arithmetic circuit} takes inputs that are elements in $\mathbb{F}$, and outputs elements in $\mathbb{F}$. We can natually use an arithmetic circuit to implement the function $f$ that Alice wants to evaluate. 
 
 \paragraph{Circuit Satisfiability Problem} While it is feasible to design an argument system for the arithmetic circuit of $f$, the argument might not be succinct. Therefore, usually we first transform the problem of checking circuit evaluation $y=f(x)$ to the circuit satisfiability problem, such that $y=f(x)\iff \exists w, C(x, w)=y$. $w$ is called a \textit{witness} that the prover should find for a new verification circuit $C$. Particularly, we can also design a circuit $C'$ from $C$ such that $C(x,w)=y\iff C'((x,y), w)=0$, treating both $x$ and $y$ as input in $C'$.  Modern snarks are mostly designed for intermediate representations such as circuit satisfiability instances. 
 
-\begin{definition}
-    The \textit{arithmetic circuit satisfiability problem} of an $\mathbb{F}$-arithmetic circuit $C:\mathbb{F}^n \times \mathbb{F}^h \to \mathbb{F}^l$ is captured by the relation $\mathcal{R}_C = \{(x, w): C(x, w)=0^l\}$; its language is $\mathcal{L}_C=\{x\in \mathbb{F}^n: \exists w\in\mathbb{F}^h, (x, w)\in \mathcal{R}_C \}$.  
+\begin{definition}{(\textbf{Arithmetic Circuit Satisfiability Problem})}
+    An \textit{arithmetic circuit satisfiability problem} of an $\mathbb{F}$-arithmetic circuit $C:\mathbb{F}^{k_x} \times \mathbb{F}^{k_w} \to \mathbb{F}^{k_y}$ is captured by the relation $\mathcal{R}_C = \{(x, w): C(x, w)=0^{k_y}\}$; its language is $\mathcal{L}_C=\{x\in \mathbb{F}^{k_x}: \exists w\in\mathbb{F}^{k_w}, (x, w)\in \mathcal{R}_C \}$.  
 \end{definition}
 
 A SNARK for circuit satisfiability problem in a field $\mathbb{F}$ is a triple of polynomial time algorithm $(\mathsf{KeyGen}, \mathsf{Prove}, \mathsf{Verify})$:
@@ -162,7 +163,13 @@ A SNARK for circuit satisfiability problem in a field $\mathbb{F}$ is a triple o
 
 A SNARK satisfies the following properties: 
 \begin{itemize}
-    \item Completeness: For every security parameter $\lambda$, any $\mathbb{F}$-arithmetic circuit $C$, and any $(x,a)\in\mathcal{R}_C$, the honest prover can convince the verifier. Namely, $b = 1$ with probability $1-negl(\lambda)$ in the following experiment: $(\mathsf{pk}, \mathsf{vk}) \to \mathsf{KeyGen}(1^{\lambda}, C); \pi \leftarrow \mathsf{Prove}(\mathsf{pk}, x, a); b \leftarrow \mathsf{Verify}(\mathsf{vk}, x, \pi)$.
-    \item Succinctness. An honestly generated proof $\pi$ has $O_\lambda(1)$ bits and $\mathsf{Verify}($ $\mathsf{vk},x,\pi)$ runs in time $O_\lambda(|x|)$. (Here, $O_\lambda$ hides a fixed polynomial factor in $\lambda$.)
-    \item Proof of knowledge (and soundness). If the verifier accepts a proof output by a bounded prover, then the prover “knows” a witness for the given instance. (In particular, soundness holds against bounded provers.) Namely, for every $poly(\lambda)$-size adversary $\mathcal{A}$, there is a $poly(\lambda)$-size extractor $\mathcal{E}$ such that $Verify(\mathsf{vk}, x, \pi) = 1$ and $(x, w) \in \mathcal{R}_C$ with probability $negl(\lambda)$ in the following experiment: $(\mathsf{pk}, \mathsf{vk}) \leftarrow \mathsf{KeyGen}(1^\lambda, C); (x, \pi) \leftarrow \mathcal{A}(\mathsf{pk}, \mathsf{vk}); a \leftarrow \mathcal{E}(\mathsf{pk}, \mathsf{vk})$.
+    \item \textbf{Completeness}: For every security parameter $\lambda$, any $\mathbb{F}$-arithmetic circuit $C$, and any $(x,w)\in\mathcal{R}_C$, the honest prover can convince the verifier. Namely, $b = 1$ with probability $1-negl(\lambda)$ in the following experiment: $(\mathsf{pk}, \mathsf{vk}) \to \mathsf{KeyGen}(1^{\lambda}, C); \pi \leftarrow \mathsf{Prove}(\mathsf{pk}, x, w); b \leftarrow \mathsf{Verify}(\mathsf{vk}, x, \pi)$.
+    \item \textbf{Succinctness}. An honestly generated proof $\pi$ has $O_\lambda(1)$ bits and $\mathsf{Verify}($ $\mathsf{vk},x,\pi)$ runs in time $O_\lambda(|x|)$. (Here, $O_\lambda$ hides a fixed polynomial factor in $\lambda$.) Note that the evaluation time and the size of witness $w$ might be significantly larger than $|x|$. 
+    \item \textbf{Proof of knowledge (and soundness)}. If the verifier accepts a proof output by a bounded prover, then the prover “knows” a witness for the given instance. (In particular, soundness holds against bounded provers.) Namely, for every $poly(\lambda)$-size adversary $\mathcal{A}$, there is a $poly(\lambda)$-size extractor $\mathcal{E}$ such that $\mathsf{Verify}(\mathsf{vk}, x, \pi) = 1$ and $(x, w) \in \mathcal{R}_C$ with probability $negl(\lambda)$ in the following experiment: $(\mathsf{pk}, \mathsf{vk}) \leftarrow \mathsf{KeyGen}(1^\lambda, C); (x, \pi) \leftarrow \mathcal{A}(\mathsf{pk}, \mathsf{vk}); a \leftarrow \mathcal{E}(\mathsf{pk}, \mathsf{vk})$.
 \end{itemize}
+
+\paragraph{Remark on zero-knowledge} Usually threshold signatures do not care about privacy of the subset of signers, therefore we do not use the zero-knowledge part, which (informally) requires that the proof $\pi$ does not leak any information about the witness $w$, of the well studied zk-SNARKs. 
+
+A numerous number of SNARKs with acceptable concrete efficiency have been proposed in the literature, including Groth16~\cite{DBLP:conf/eurocrypt/Groth16}, BulletProofs~\cite{DBLP:conf/sp/BunzBBPWM18}, Plonk~\cite{DBLP:journals/iacr/GabizonWC19}, Aurora~\cite{DBLP:conf/eurocrypt/Ben-SassonCRSVW19}, etc. There are also many tools, libraries and compilers, such as gnark, that implement zk-SANRKs that allow programmers with little cryptography knowledge to develop zk-SNARKs applications for their own problems. 
+
+Modern zk-SNARKs are mostly based on Interactive Oracle Proofs~\cite{DBLP:conf/tcc/Ben-SassonCS16} and implement the oracles with polynomial commitment schemes~\cite{DBLP:conf/asiacrypt/KateZG10}.  Constructions of SNARKs are much more complicated than digital signature schemes and secret sharing, so we do not present complete SNARK protocols in this survey. 
