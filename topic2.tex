@@ -1,0 +1,15 @@
+\section{Future Work: Incremental DKG} 
+
+Inspired by the application of blockchains, where the network participants are dynamic in the sense that (1) new participants can join and existing participants might not be active, (2) the weights of participants might evolve over time as their stake changes. In case we run key generation protocols very frequently because of the aforementioned dynamic updates, it is meaningful to design suitable DKG protocol that has good amortized complexity that outperforms the trivial approach to rerun the complete DKG protocol again. 
+
+\paragraph{For SNARK-based threshold signature} Threshold signature schemes based on SNARKs do not maintain secret shares of keys, so that DKG is not required for setting up the keys. However, special SNARKs like \cite{DBLP:conf/ccs/DasCXNB023} require the aggregator to interact with signers and do precomputation to improve the efficiency per signature. It is interesting to reduce the amount of precomputation when the set of signers changes. 
+
+\subsection{For secret-sharing based threshold signatures} 
+
+\paragraph{Adding a member} There is a straightforward solution if we want to add a new member $P_{n+1}$ to the group, while keeping the threshold $t$ unchanged. This is because the secret key share of $P_{n+1}$ is nothing but $f(n+1)$, where $f$ is the polynomial such that $f(0)$ is the secret key and $f(i)$ is the secret key share of $P_i$ for $i\in\{1,\dots, n\}$. At least $t$ existing members are required to send to $P_{n+1}$ their reconstruction shares for $f(n+1)$. The secret shares of existing members remain the same. 
+
+\paragraph{Removing a member} 
+Removing an existing member is more complicated than adding a new member. If we want to keep the same secret key $f(0)=x$ and threshold $t$, the shares of remaining members must change. Suppose the member to remove is $P_n$, the remaining members should replace $f$ with another function $f'$ such that $f'(0)=f(0)=x$ but $f'(n)$ is indistinguishable from uniform randomness in the view of $P_n$. Since $f'$ and $f$ are different univariate polynomials of degree at most $t-1$, the valuation of $f'$ and $f$ coincide with at most $t-1$ locations, indicating that at least $(n-1)-(t-2) = n-t+1 = \Theta(n)$ remaining members must update their secret key shares. If there is no specific optimization, this is close to rerun the DKG protocol again, such as in \cite{DBLP:journals/npa/NoackS09}. 
+
+Considering these challenges, it is interesting to design novel threshold signature schemes and DKG protocols that have desirable amortized complexity in a dynamic system where members might join or leave. 
+

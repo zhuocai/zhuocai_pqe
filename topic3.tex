@@ -1,0 +1,5 @@
+\section{Future Work: Alternative Solutions to Multi-Threshold Threshold Cryptosystem}
+
+Traditional secret-sharing based threshold cryptosystem usually has a fixed threshold $t$. Researchers proposed to include dummy parties for flexible threshold. However, these schemes~\cite{DBLP:conf/crypto/DelerableeP08} require a threshold signature to specify the set of signers $S$ that generate the signature. In the verification step, the verifiers must know the set $S$, so that the verification time is $O(n)$. 
+
+A direction that is worth exploring is to find a new light-weight cryptographic primitive for dynamic-threshold threshold signatures that allows (1) generating a signature of sublinear/constant size, (2) verifying any signature in sublinear/constant time using a verification key of sublinear/constant size. By light-weight, it cannot use complicated primitives like SNARKs. I conject that there is a solution. The solution should be highly related to secret sharing, but cannot use discrete log based cryptography.  

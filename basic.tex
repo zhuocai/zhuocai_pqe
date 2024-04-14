@@ -102,7 +102,7 @@ How to share a secret $s$ among $n$ players such that any subset of at least $t$
 
 For any group of at most $t-1$ players, they only know at most $t-1$ evaluations of the polynomial $f$, so $s$ can be an arbitrary value in the allowed range. Shamir secret sharing is an important building block of many threshold signature schemes. 
 
-\subsubsection{(Publicly) Verifiable Secret Sharing} 
+\subsubsection{(Publicly) Verifiable Secret Sharing} \label{subsubsec:vss}
 If the dealer is required to prove that the shares are distributed correctly and signers are required to prove that they help reconstruct correctly, the variant of secret sharing is called verifiable secret sharing (VSS). If the proofs can be non-interactive and publicly verified by external parties, then it is called publicly verifiable secret sharing (PVSS). In the setting of distributed key generation in threshold signature schemes, as long as the participants of the system believe that the protocols are executed correctly, they can proceed to generate signatures. Therefore, only VSS is required. We introduce the VSS proposed by Pedersen~\cite{DBLP:conf/crypto/Pedersen91}. 
 
 Before presenting Pedersen's VSS, we introduce commitment schemes. Intuitively, commitment scheme allows a player to commits to a number but keep the number itself secret. 

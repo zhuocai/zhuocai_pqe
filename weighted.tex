@@ -2,14 +2,14 @@
 
 In the threshold signature schemes introduced in section \ref{sec:threshold}, every signer has the same unit weight. These schemes have constant signature size and verification key size, constant verification time. When we consider the application of voting in cryptocurrencies, different participants have different amounts of influence on the voting result. In Proof-of-Stake, the weight of a user is proportional to the amount of coins that he deposits as his stake. 
 
-\paragraph{Simple Solution} A simple solution is to allow a user with a large weight to control multiple signers. In other words, it uses a \textit{virtualization} of threshold signature schemes. For example, in a system of 3 users, $U_1$ with a weight $1$, $U_2$ with a weight $2$ and $U_3$ with a weight $3$. The resulting threshold system consists of $6$ signers $\{P_1,P_2,\dots, P_6\}$. $U_1$ controls $S_1=\{P_1\}$, by owning the secret share of $P_1$. $U_2$ controls $S_2 = \{P_2,P_3\}$, while $U_3$ controls $S_3 = \{P_4, P_5, P_6\}$. Whenever a user wants to help create a signature, he asks all signers that he controls to participate the signing protocol. The simple solution is undesirable in PoS cryptocurrencies, because the stake (hence the weights) of accounts differ a lot. The "richest" account might possess more than $10^8$ times of another account. Then one rich account alone occupies at least $10^8$ secret key shares in the threshold signature scheme, which makes the virtualization solution practically infeasible. 
+\paragraph{Simple Solution} A simple solution is to allow a user with a large weight to control multiple signers. In other words, it uses a \textit{virtualization} of threshold signature schemes. For example, in a system of 3 users, $U_1$ with a weight $1$, $U_2$ with a weight $2$ and $U_3$ with a weight $3$. The resulting threshold system consists of $6$ signers $\{P_1,P_2,\dots, P_6\}$. $U_1$ controls $S_1=\{P_1\}$, by owning the secret share of $P_1$. $U_2$ controls $S_2 = \{P_2,P_3\}$, while $U_3$ controls $S_3 = \{P_4, P_5, P_6\}$. Whenever a user wants to help create a signature, he asks all signers that he controls to participate the signing protocol. The simple solution is undesirable in PoS cryptocurrencies, because the stake (hence the weights) of accounts differ a lot. The ``richest'' account might possess more than $10^8$ times of another account. Then one rich account alone occupies at least $10^8$ secret key shares in the threshold signature scheme, which makes the virtualization solution practically infeasible. 
 
 
 \paragraph{Sampling-based approach} To reduce the complexity of the aforementioned virtualization approach, Chaidos and Kiayias present a sampling based weighted threshold signature scheme~\cite{DBLP:journals/iacr/ChaidosK21}. The idea is to sample a subset of signers according to the weight distribution and let the sampled signers join an unweighted threshold signature scheme. However, sampling random subsets avoids the problem of designing efficient weighted threshold signature scheme rather then solves the problem. It introduces sampling bias, such that the actual threshold is not exact. \cite{DBLP:conf/ccs/DasCXNB023} further argues that the sampling-based approach requires a secure sample mechanism and is typically vulnerable to adaptive corruption. 
 
 \paragraph{Weighted Secret Sharing} Another approach is to modify the secret sharing part in unweighted threshold signature schemes to accommodate the weighted setting. Generic weighted secret sharing (WSS) was first characterized by Beimel~\cite{DBLP:conf/tcc/BeimelTW05} and require that the share size of a signer is sublinear in his weight. Subsequent works develop more WSS schemes, such as \cite{DBLP:conf/crypto/GargJMSWZ23}. However, these schemes have undesirable concrete performance so far. 
 
-\paragraph{SNARK} SNAKRs allow efficiently verifying a general class of computation and are suitable solutions for weighted threshold signatures. Recall that SNARKs can generate a proof of $O_\lambda(1)$ size and $O_\lambda(|x|)$verification time for a circuit satisfiability problem $\exists w\in\{0,1\}^{k_w}, C(x, w)=0^{k_y}$. The most important goal is to allow anyone to efficiently verify that a threshold signature is valid or not. Therefore, we should reduce the size of $x$ as much as possible. If $|x| = O(1)$, the verification time is also constant. On the signer side, if we need $O(n)$ signers to generate a threshold signature, at least $O(n)$ bits of total communication are required. Ideally we want to control the overall communication/computation to generate a threshold signature $\sigma$ to be close to the lower bound $O(n)$. These goals can be achieved by SNARKs. 
+\paragraph{SNARK} SNARKs allow efficiently verifying a general class of computation and are suitable solutions for weighted threshold signatures. Recall that SNARKs can generate a proof of $O_\lambda(1)$ size and $O_\lambda(|x|)$verification time for a circuit satisfiability problem $\exists w\in\{0,1\}^{k_w}, C(x, w)=0^{k_y}$. The most important goal is to allow anyone to efficiently verify that a threshold signature is valid or not. Therefore, we should reduce the size of $x$ as much as possible. If $|x| = O(1)$, the verification time is also constant. On the signer side, if we need $O(n)$ signers to generate a threshold signature, at least $O(n)$ bits of total communication are required. Ideally we want to control the overall communication/computation to generate a threshold signature $\sigma$ to be close to the lower bound $O(n)$. These goals can be achieved by SNARKs. 
 
 \subsection{Weighted Threshold Signatures from Generic SNARKs}
 \paragraph{Problem Setting} There are $n$ signers $\{P_1, P_2, \dots, P_n\}$, with weights $\{w_1,w_2,\dots, w_n\}\in \mathbb{Z}$ respectively, such that $\sum_{i=1}^n w_i = W$. Suppose we use BLS signature scheme, with a blinear pairing $e:\mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$, a hash function $H:\{0,1\}^\ast\to \mathbb{G}_1$, a generator $g_2$ of prime order $p$ in group $\mathbb{G}_2$. Each signer $P_i$ has a secret key $\mathsf{sk}_i = x_i \in \mathbb{Z}_p$ and publishes a public key $\mathsf{pk}_i = g_2^{x_i}$. Let $\mathbf{pk}$ denote the vector $[\mathsf{pk}_1,\mathsf{pk}_2,\dots, \mathsf{pk}_n]$ and $\mathbf{w}$ denote the vector $[w_1,w_2,\dots, w_n]$. We consider a session of threshold signature for a message $m$, with a threshold requirement that can be arbitrary within $(0, W]$ and might vary in different sessions. A threshold signature $\tilde{\sigma}$ is valid is $\sum_{i\in S}w_i\ge t$, where $S$ is the signer set. SNARK-based threshold signature can allow the signature creator to arbitrarily specify the overall weights $t$ of the signer set $S$, different from secret sharing based approach where the threshold is fixed before aggregation. 
@@ -18,24 +18,48 @@ In the threshold signature schemes introduced in section \ref{sec:threshold}, ev
 
 \paragraph{Protocol} For a message $m$, each signer $P_i$ from a signer set $S$ creates a partial signature $\sigma_i = H(m)^{x_i}\in \mathbb{G}_1$. One combiner, who can be one of the signers in $S$ or any third party, receives all partial signatures $\sigma_S = \{\sigma_i\}_{i\in S}$, checks they are valid partial sigantures using their corresponding public keys and combines all the partial signatures by producing a succinct non-interactive proof that can be verified by everyone with access to the public information $(H(m), c_{\mathbf{pk}}, c_{\mathbf{w}})$. 
 
-\paragraph{Circuit Satisfiability Problem for Weighted Threshold Signatures} Suppose the signer set is $S\subseteq \{1,2,\dots, n\}$. If  The relation that characterize a valid signature is the following:
+\paragraph{Circuit Satisfiability Problem for Weighted Threshold Signatures} Suppose the signer set is $S\subseteq \{1,2,\dots, n\}$. If  The relation that characterizes a valid signature is the following:
 
 \begin{equation*}
     \mathcal{R}_{WTS} = 
 \Bigg\{\space \begin{matrix}
-         x = (H(m), t, c_{\mathbf{pk}, c_{\mathbf{w}}}, c_{S}, c_{\sigma_{S}})\\
+         x = (m, t, c_{\mathbf{pk}, c_{\mathbf{w}}}, c_{S}, c_{\sigma_{S}})\\
          w = (\mathbf{pk}, \mathbf{w}, S, \sigma_S)\\
     \end{matrix}\quad \Bigg| \quad \begin{matrix}
-        c_{\mathbf{pk}} = \mathsf{commit}(\mathbf{pk}), 
-        c_{\mathbf{w}} = \mathsf{commit}(\mathbf{w})\\
-        c_{S} = \mathsf{commit}(S),
-        c_{\sigma_{S}} = \mathsf{commit}(\sigma_S) \\
+        \mathbf{pk}\in \mathbb{G}_2^n; c_{\mathbf{pk}} = \mathsf{commit}(\mathbf{pk})\\
+        \mathbf{w}\in \mathbb{F}^n, ||\mathbf{w}||_1<|\mathbb{F}|;  c_{\mathbf{w}} = \mathsf{commit}(\mathbf{w})\\
+        S\subseteq \{1,2,\dots, n\}; c_{S} = \mathsf{commit}(S)\\
+        \sigma_{S} \in \mathbb{G}_1^{|S|} ;c_{\sigma_{S}} = \mathsf{commit}(\sigma_S) \\
         \forall i\in S, e(H(m), \mathsf{pk}_i) = e(\sigma_i, g_2) \\
         t = \sum_{i\in S} w_i  \\
     \end{matrix}\space \Bigg\}
 \end{equation*}
 
+\paragraph{Remark on $||w||_1$} The maximum possible overall weight is $||w||_1 = \sum_{i=1}^n w_i$. SNARKs require that the number can be represented by a field element, so we require that $||w||_1<|\mathbb{F}|$. Therefore verifier complexity of SNARKs w.r.t. the $||w||_1$ can be $O(poly(\log(||w||)))$, which is significantly more efficient than $O(||w||_1)$, the complexity of the trivial virtualization approach. 
+
 \paragraph{Signature size} The generated threshold signature is $x$ and a SNARK proof that $(x,w)\in \mathcal{R}_{WTS}$. Both parts consist of $O(1)$ bits. The verification time is also constant, when using SNARKs like Groth16 and Plonk. 
 
 \subsection{Weighted Threshold Signatures from Special SNARKs}
-While generic snarks based approaches create threshold signatures with very small signature size and verification time, \cite{DBLP:conf/ccs/DasCXNB023} argues that the aggregation time (prover complexity) is too high for practical applications. To optimize the aggregation time, \cite{DBLP:conf/ccs/DasCXNB023} proposed a weighted threshold signature scheme based on pairing based Multisignature and inner product arguments (IPA). 
+While generic snarks based approaches create threshold signatures with very small signature size and verification time, \cite{DBLP:conf/ccs/DasCXNB023} argues that the aggregation time (prover complexity) is too high for practical applications. To optimize the aggregation time, \cite{DBLP:conf/ccs/DasCXNB023} proposed a weighted threshold signature scheme based on pairing based multisignature (introduced in section \ref{subsubsec:multisig}) and inner product arguments (IPA). We briefly introduce this scheme in the survey. 
+
+\paragraph{Relation of IPA-based WTS} Let $S$ be the subset of signers who contribute partial signatures. Let $\mathbf{b}=[b_1,b_2,\dots, b_n]\in \{0,1\}^n$ be a bit vector where $b_i=1$ for each $i\in S$ and 0 otherwise. The subset multisignature on $m$ is $(\mathbf{b}, \sigma)$, where $\sigma = \prod_{i\in S}\sigma_i$. Let $\mathbf{\sigma}=[\sigma_1,\sigma_2,\dots, \sigma_n]$, where $\sigma_i$ can be an arbitrary element in $\mathbb{G_1}$ if no partial signature is received from signer $i$. Compared to the previous generic snark based approach, the aggregator $\mathcal{P}$ also computes the aggregated public key of the set $S$ as $\mathsf{pk}_S = \prod_{i\in S}\mathbf{pk}_i$ and the commitment $c_{\mathbf{b}}$ for the bit vector $\mathbf{b}$.  $\mathcal{P}$ sends the tuple $(m, c_{\mathbf{b}}, \mathsf{pk}_S, t, \sigma)$ to the verifier $\mathcal{V}$, along with a proof $\pi$ that these values are computed correctly, which is specified in the relation $\mathcal{R}_{IPA-WTS}$ below. After the SNARK check passes, $\mathcal{V}$ accepts the signature $\sigma$ if $e(H(m), \mathsf{pk}_S)  = e(\sigma, g_2)$. Assume that the two base groups for bilinear pairing are the same, i.e., $\mathbb{G}_1=\mathbb{G}_2 = \mathbb{G}$ and $g_1=g_2=g$. 
+
+\begin{equation*}
+    \mathcal{R}_{IPA-WTS} = 
+\Bigg\{\space \begin{matrix}
+         (c_{\mathbf{b}}, \mathsf{pk}_S, \sigma))\in \mathbb{G}^3\\
+    \end{matrix}\quad \Bigg| \quad \begin{matrix}
+        \mathbf{pk}\in \mathbb{G}^n; c_{\mathbf{pk}} = \mathsf{commit}(\mathbf{pk})\\
+        \mathbf{w}\in \mathbb{F}^n, ||\mathbf{w}||_1<|\mathbb{F}|;  c_{\mathbf{w}} = \mathsf{commit}(\mathbf{w})\\
+        \mathbf{b} \in \{0,1\}^n; c_{\mathbf{b}} = \mathsf{commit}(\mathbf{b}) \\
+        \mathbf{\sigma}\in \mathbb{G}^n; <\mathbf{\sigma}, \mathbf{b}>=\sigma\\
+        <\mathbf{w}, \mathbf{b}> = t; <\mathbf{pk}, \mathbf{b}>=\mathsf{pk}_{\mathbf{b}}\\
+    \end{matrix}\space \Bigg\}
+\end{equation*}
+
+\paragraph{$\mathcal{R}_{IPA-WTS}$ as an IPA} The key idea of \cite{DBLP:conf/ccs/DasCXNB023} is to formulate $\mathcal{R}_{IPA-WTS}$ as an inner product argument (IPA) between $\mathcal{P}$ and $\mathcal{V}$. The constraints $t=<\mathsf{w},\mathsf{b}>$ and $\mathsf{pk}_{\mathbf{b}} = <\mathbf{pk}, \mathbf{b}>$ are naturally inner product constraints. Proving $\mathbb{b}$ is binary vector can also be solved by IPA~\cite{DBLP:conf/sp/BunzBBPWM18}. Among these inner product constraints, $<\mathbf{w}, \mathbf{b}>$ is simpler because both vectors consists of field elements and can be solved by existing IPA~\cite{DBLP:conf/asiacrypt/CampanelliNRZZ22}. $<\mathbf{pk}, \mathbf{b}>$ is the main challenge, because $\mathbf{pk}$ consists of group elements. The IPA scheme for group elements are the structured key generalized inner product argument (GIPA) proposed in \cite{DBLP:conf/asiacrypt/BunzMMTV21,DBLP:conf/tcc/Lee21}. \cite{DBLP:conf/ccs/DasCXNB023} argues that the GIPA approach has bad concrete efficiency, because they operate with the target group $\mathbb{G}_T$ directly. 
+
+\paragraph{IPA of \cite{DBLP:conf/asiacrypt/CampanelliNRZZ22} for $<\mathbf{x}, \mathbf{b}>$} The inner product $<\mathbf{pk}, \mathbf{b}> = g^{\sum_{i=1}^n b_i x_i}$. Let $\mathbf{x}=[x_1, x_2,\dots, x_n]$, then $<\mathbf{pk}, \mathbf{b}>=g_2^{<\mathbf{x}, \mathbf{b}>}$. The IPA protocol uses a powers-of-tau of degree $n$, i.e., $[g, g^\tau, g^{\tau^2},\dots, g^{\tau^n}]$, as the common reference string (CRS), where $\tau$ is not known to anyone. 
+
+{\color{red} TODO write more details, depending on availability}
+

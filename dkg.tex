@@ -2,9 +2,55 @@
 
 To deploy the threshold signature schemes in the distributed settings, such as in cryptocurrency applications, it is desirable to setup the public parameters and send the secret shares without trusting any third-party dealer. Instead, we prefer to share the secret using a distributed protocol, under a series of works on Distributed Key Generation (DKG). 
 
-Shortly after threshold cryptosystems were proposed in the late 1980s~\cite{DBLP:conf/crypto/DesmedtF89}, early DKG protocols were developed~\cite{DBLP:conf/eurocrypt/Pedersen91a}. 
+Shortly after threshold cryptosystems were proposed in the late 1980s~\cite{DBLP:conf/crypto/DesmedtF89}, early DKG protocols were developed~\cite{DBLP:conf/eurocrypt/Pedersen91a}. While threshold signature scheme itself is efficient where generating the threshold signature only requires linear $\Theta(n)$ total communication and the verification is even more efficient, the DKG protocol that sets up the keys for threshold signature can be quite expensive, requiring at least quadratic $\Omega(n^2)$ total communication. DKG indeed becomes the bottleneck for threshold signatures in volatile systems where the global signer set evolves rapidly, and hence has attracted many research efforts to improve the efficiency under various settings, for example~\cite{DBLP:conf/sp/DasYXMK022,DBLP:conf/uss/DasXK023}. 
 
 Before introducing theses DKG protocols, we briefly sketch the ideas. With verifiable secret sharing, the participants can guarantee that the shares are correct and consistent, when someone shares a secret. However, they cannot simply ask one of the signers to take the role of the leader that chooses a secret by himself and share with others. The signers do not want anyone to know the secret $x$, and want to keep their own shares secret from all others. What if multiple signers jointly create this secret $x$? For example, signer $1$ and signer $2$ choose local secrets $a$ and $b$ respectively, then they share their secrets among all signers. Every signer $i$ receives $a_i$ and $b_i$. $a+b$ becomes a good secret such that every signer $i$ knows its share $a_i+b_i$, and this share of signer $i$ is unknown to others, as long as signer $1$ and $2$ do not collude with each other. 
 
-\subsection{Pedersen's DKG}
+\subsection{Pedersen's DKG for Threshold Cryptosystems}
 
+\paragraph{Select keys} Let $\mathsf{commit}(x)$ denote a commitment to $x\in\{0,1\}^\ast$, with a slight abuse of notation that ignores the random string $r$. The keys are selected in the following rounds:
+
+\begin{enumerate}
+    \item Party $P_i$ chooses $s_i\in \mathbb{Z}_q$ at random and computes $h_i = g^{s_i}$. Then $P_i$ broadcasts $\mathsf{commit}(h_i)$ to all members. 
+    \item When all $n$ members have broadcast a commitment, each $P_i$ opens his own commitment and reveals $h_i$. 
+    \item The public key, $h$, is computed as $h = \prod_{i=1}^n h_i$. 
+\end{enumerate}
+
+Now all members know the public key $h$, but they do not know the secret key $s=\sum_{i=1}^n s_i$, unless they all work together. Therefore, $\{s_1, s_2,\dots, s_n\}$ should not be the secret shares for threshold signature schemes. Instead, each party $P_i$ will share his own secret $s_i$ among all members, using a verifiable secret sharing protocol in section \ref{subsubsec:vss}. 
+
+\paragraph{Distribute keys} Each party $P_i$ chooses a polynomial $f_i$ of degree at most $t-1$ such that $f_i(0)= s_i$. $P_i$ sends $f_i(j)$ to party $P_j$ in a verifiable manner. After this phase, every party $P_j$ receives $(f_1(j), f_2(j), \dots, f_n(j))$. Note that the secret shares of $s=\sum_{i=1}^n s_i$ can be derived from the polynomial $f$ defined as $f(x)=f_1(x) + f_2(x) + \cdots + f_n(x)$. Every party $P_j$ can compute his share $f(j) = f_1(j)+f_2(j)+\cdots+f_n(j)$. Since $f$ has degree at most $t-1$, any $t$ parties can reconstruct the secret key $s=f(0)$ using Lagrange interpolation. 
+
+With Pedersen's DKG, the secret key share of $P_i$ is defined as $\mathsf{sk}_i = f(i)=\sum_{j=1}^n f_j(i)$, for Schnorr and BLS threshold signatures. 
+
+\subsection{Asynchronous DKG} 
+Pederson's DKG is designed for synchronous networks, where messages are guaranteed to be delivered to the recipients within a known bounded delay. In real world scenarios, messages might be delayed arbitrarily long due to network issues or malicious nodes, which is modeled by an asynchronous network. Asynchronous networks, allow a bounded number $t_{A}$ of participants to be arbitrarily corrupted. Usually asynchronous networks tolerates $t_A = \Theta(n)$ faulty parties, and the asynchronous DKG protocols typically require at least $O(n^3)$ total communication, significantly more expensive than synchronous DKG protocols with $O(n^2)$ communication cost. 
+
+\paragraph{Randomness Beacon, Threshold Cryptosystem and Asynchronous Consensus} The biggest challenge of DKG for threshold signatures is to reach consensus on which secret shares to aggregate for the final secret key $\mathsf{sk}$. Reaching agreement under asynchrony requires shared randomness. However, existing efficient mechanisms to generate shared randomness assume threshold secret-shared keys, hence creating a circularity. For our asynchronous DKG for threshold signatures, we should try to efficiently generate shared randomness internally instead of resorting to external random beacons. 
+
+\paragraph{Technical overview of \cite{DBLP:conf/sp/DasYXMK022}} \cite{DBLP:conf/sp/DasYXMK022} presents an asynchronous DKG protocol to bootstrap threshold signature schemes. While Byzantine consensus protocols require shared randomness, Byzantine reliable broadcast protocols do not. Therefore, after the secret sharing step, \cite{DBLP:conf/sp/DasYXMK022} does not reach consensus on the secret shares immediately, but ask each party $P_i$ to broadcast a set $T_i$, called a \textit{intermediate key set}. The intermediate key set is later used in asynchronous Byzantine binary agreement and the secrets of the set act as the shared randomness when required by the consensus protocol. 
+
+\begin{definition} (\textbf{Reliable Broadcast}). A protocol for a set of nodes $\{1,2,\dots, n\}$, where a distinguished node called the broadcaster holds an initial input $M$, is a reliable broadcast (RBC) protocol, if the following properties hold:
+    \begin{itemize}
+        \item \textit{Agreement}: If an honest node outputs a message $M'$ and another honest node outputs $M''$, then $M'=M''$. 
+        \item \textit{Validity}: If the broadcaster is honest, all honest nodes eventually output the message $M$. 
+        \item \textit{Totality}: If an honest node outputs a message, then every honest node eventually outputs a message.  
+    \end{itemize}
+\end{definition}
+
+The DKG of \cite{DBLP:conf/sp/DasYXMK022} uses a \textit{validated} RBC protocol of \cite{DBLP:conf/ccs/DasX021}. To broadcast a message $M$, the communication cost is $O(n|M| + \kappa n^2)$, where $|M|$ is the size of $M$ and $\kappa$ is the output size of a collision-resistant hash function.  
+
+To fit the asynchronous setting, \cite{DBLP:conf/sp/DasYXMK022} characterizes the requirement of secret sharing as \textit{asynchronous complete secret sharing (ACSS)} use the ACSS protocol of \cite{DBLP:conf/ccs/DasX021}. We omit the definition, requirement and constructions in this survey. 
+
+\begin{definition} (\textbf{Asynchronous Byzantine Agreement (ABA)}). 
+    A protocol for a set of nodes $\{1,\dots, n\}$, each node $P_i$ holding an initial binary input $b_i\in\{0,1\}$, is an ABA protocol, if the following properties hold under asynchrony:
+    \begin{itemize}
+        \item \textit{Agreement}: No two honest nodes output different values. 
+        \item \textit{Validity}: If all honest nodes have the same input value, no honest node outputs a different value. 
+        \item \textit{Termination}: Every honest node eventually outputs a value. 
+    \end{itemize}
+\end{definition}
+
+\cite{DBLP:conf/sp/DasYXMK022} uses the ABA protocol of Crain~\cite{DBLP:journals/corr/abs-2002-08765} that provides an additional property called \textit{Good-Case-Coin-Free}. This property states that if all honest nodes input the same value to the ABA, then all honest nodes output without invoking the common coin (randomness).  The \textit{Good-Case-Coin-Free} property is required to ensure the liveness of the DKG protocol in case a malicious node does not propose any intermediate key set. With no intermediate key set, there is no shared randomness for the particular node. However, all honest nodes will have the same default input $0$, so that randomness is not required to achieve consensus. 
+
+
+\paragraph{Performance} The expected total \textit{communication} cost of the ADKG protocol is $O(n^3)$. The expected \textit{computation} cost per node is $O(\kappa n^3)$, measured in number of elliptic curve exponentiations. The protocol terminates in $P(\log{n})$ \textit{rounds} in expectation. 

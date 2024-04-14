@@ -1,4 +1,31 @@
-For blockchain applications. Bitcoin wallet. 
+\section{Future Work: Succinct Aggregate Signatures}
 
-Dynamic participation. 
+In section \ref{subsec:aggregate} we discussed an exotic signature scheme for aggregating signatures on different messages. However, in the BGLS aggregate signature scheme~\cite{DBLP:conf/eurocrypt/BonehGLS03}, the verifier should access all $n$ public keys for verification that takes $O(n)$ time. Using SNARKs, it is possible to aggregate multiple signatures on different messages into a succinct signature and allow efficient verification of the succinct signature using a short verification key. 
 
+\subsection{Motivation from the Application of Democratic Voting} 
+
+\paragraph{Traditional BFT protocols} In traditional distributed systems that consider fault tolerance, for example in a blockchain where less than half of participants can be malicious, it is not easy to achieve both consensus and liveness. Byzantine fault tolerant broadcast protocols have been proposed, in both synchronous setting and asynchronous setting. These protocols typically allow only one person to publish a message and achieve the goal that every honest participant receives the same message in the end, even at the presence of a certain ratio of malicious participants. 
+
+\paragraph{Democratic Voting} We consider democratic voting in a distributed system. Creating blocks in blockchains is an important problem in the real world that can benefit from a democratic voting scheme,  where every cryptocurrency participant can publish a block proposal for any round. Democratic voting is different from the broadcast problem, because every participant, instead of only one participant, each time is allowed to propose his own message. The message with the most votes should be agreed by all honest participants in the end. Propagating the candidate messages across the network is relatively easy. The challenge is to propagate the votes and reach consensus on the voting result. Suppose every participant can vote for at most one candidate message. While it is theoretically possible for every participant $i$ to broadcast his vote to all others so that all honest participants reach consensus on the voting result, it is infeasible in large-scale applications, since an asynchronous byzantine broadcast session already requires $\Theta(n^2)$ total communication. 
+
+\paragraph{Weighted threshold signature is not enough} While the weighted threshold signature schemes introduced in section \ref{sec:weighted} allow aggregating the votes for the same candidate, it is worth mentioning that the winning candidate $m_w$ might receive fewer than $n/2$ votes. Therefore, one threshold signature of the winning candidate with threshold $t<n/2$ alone cannot convince all honest participants that $m_w$ wins.  If a verifier in the future does not see the votes for other candidates, it is possible that there is another message candidate with more votes than $m_w$ in the view of the future verifier. Suppose $m_w$ receives $n/3$ votes and two other candidates $m_1$ and $m_2$ receive $n/4$ votes each, then the aggregate signature for $m_w$ is not sufficient to convince the future verifier but the aggregate signature for distinct candidates $(m_w, m_1, m_2)$ can convince verifiers that no message other than $m_w$ can receive more than $n/3$ votes, assuming that no participant casts $2$ or more votes. Note that there is alternative solution that does not require aggregate signature scheme for distinct messages, which is to ask all participants to vote again only for $m_w$ so that $m_w$ will by attested by a majority of votes. However, this solution might involve expensive communication to achieve consensus on $m_w$ among the currently active participants. 
+
+\paragraph{Circuit Satisfiability Problem of Aggregate Signatures} Assume we want to aggregate the signatures for message $\{m_w, m_1, m_2,\dots, m_k\}$. Let $S_w$ denote the set of participants who vote for $m_w$ by broadcasting their partial signatures for $m_v$. Similarly, let $S_i$ denote the set of participants who vote for the message $m_i$. Let $\mathbf{S}$ denote $[S_1,\dots, S_k]$. Aggregating the signature for $m_w$ is exactly solved by a weighted threshold signature. Therefore, we focus on aggregating the signatures for all other messages and aim for succinct signatures that can be verified in time sublinear in $k$, preferably independent of $k$. Comparing to the WTS, the verifier also receives a succinct commitment of all messages. Let $\mathbf{m}$ denote $[m_1, m_2,\dots, m_k]$ and $c_{\mathbf{m}}$ denote its commitment. In our application of democratic voting, the verifier only cares about there exist messages that receive $t$ votes, but not about what these messages are exactly.  Note that the aggregate signature in section \ref{subsec:aggregate} requires that all $n$ messages are distinct, which is not assumed in this section. The relation of aggregate signature is the following (ignoring the WTS on $m_w$ for simplicity):
+
+\begin{equation*}
+    \mathcal{R}_{AS} = 
+\Bigg\{\space \begin{matrix}
+         x = (c_{\mathbf{m}}, t,  c_{\mathbf{pk}, c_{\mathbf{w}}}, c_{\mathbf{S}}, c_{\mathbf{\sigma}_{\mathbf{S}}})\\
+         w = (\mathbf{m}, \mathbf{pk}, \mathbf{w}, \mathbf{S}, \mathbf{\sigma_S})\\
+    \end{matrix}\quad \Bigg| \quad \begin{matrix}
+        \mathbf{pk}\in \mathbb{G}_2^n; c_{\mathbf{pk}} = \mathsf{commit}(\mathbf{pk})\\
+        \mathbf{w}\in \mathbb{F}^n, ||\mathbf{w}||_1<|\mathbb{F}|;  c_{\mathbf{w}} = \mathsf{commit}(\mathbf{w})\\
+        \forall i\in \{1,2,\dots, k\}, S_i\subseteq \{1,2,\dots, n\}; c_{S} = \mathsf{commit}(\mathbf{S})\\
+        \forall i\neq j, S_i \cap S_j = \emptyset \\
+        \forall i\in \{1,2,\dots, k\}, \mathbf{\sigma}_{S_i} \in \mathbb{G}_1^{|S_i|} ;c_{\mathbf{\sigma_{S}}} = \mathsf{commit}(\mathbf{\sigma_S}) \\
+        \forall i\in \{1,2,\dots, k\}, \forall j\in S_i, e(H(m_i), \mathsf{pk}_j) = e(\sigma_j, g_2) \\
+        t = \sum_{i=1}^k \sum_{j\in S_i} w_j  \\
+    \end{matrix}\space \Bigg\}
+\end{equation*}
+
+\paragraph{Special SNARK} Besides implementing the aggregate signature scheme using generic SNARKs, it is meaningful to characterize its concrete performance and explore special SNARKs that possibly improve the efficiency further. 

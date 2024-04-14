@@ -7,7 +7,7 @@ Threshold signature scheme involves $n$ signers. The typical setting is that any
 \paragraph{Trivial Construction} A trivial solution for threshold signature scheme is that each signer generates a secret/public key pair using a digital signature scheme and a concatenation of at least $t$ signatures is considered as a valid signature. The public key of this threshold signature scheme is the list of all $n$ public keys. The disadvantages of the na\"ive threshold signature scheme are (1) the signature size is $\Theta(t)$, (2) the size of public key is $\Theta(n)$ and (3) consequently the verification time is $\Theta(n)$. Note that usually we consider $t = \Theta(n)$. Ideally, we want threshold signature schemes with public keys/signatures of constant size and constant verification time. 
 
 \begin{definition}
-    A $(n, t)$-\textbf{threshold signature scheme}, $\mathsf{TS}$, consists of four algorithms $(\mathsf{Setup, Gen, Sig, Ver})$ defines as the following:
+    A $(n, t)$-\textbf{threshold signature scheme}, $\mathsf{TS}$, consists of four algorithms ($\mathsf{Setup}$, $\mathsf{Gen}$, $\mathsf{Sig}$, $\mathsf{Ver}$) defines as the following:
     \begin{itemize}
         \item $\mathsf{Setup}(1^\lambda)\to \mathsf{par}$ takes as input the security parameter $1^\lambda$ and outputs global public parameters $\mathsf{par}$, where $\mathsf{par}$ implicitly defines sets of public keys, secret keys, messages and signatures, and all algorithms related to $\mathsf{TS}$ implicitly take $\mathsf{par}$ as input. 
         \item $\mathsf{Gen(par)}\to (\mathsf{pk, sk_1,\dots, sk_n})$ takes as input public parameters $\mathsf{par}$, and outputs a public key $\mathsf{pk}$ and secret key shares $\mathsf{sk_1, \dots, sk_n}$. 
@@ -49,7 +49,10 @@ The purpose of $\Delta$ is to make sure $\lambda_{i, j}^S$ are integers. Then, w
 
 \paragraph{Generating a signature share} For a message $M$, let $x=H(M)$. The signature share of player $i$ consists of $\sigma_i = x^{2 \Delta \mathsf{sk_i}}$. 
 
-\paragraph{Combining Shares} Suppose we have valid shares from a set $S$ of players, where $S=\{i_1, \dots, i_k\}\subset \{1, 2, \dots, n\}$. To combine the shares, we compute $w=\prod_{j=1}^k \sigma_{i_j}^{2\lambda_{0, i_j}^S} = \prod_{j=1}^k x^{2\lambda_{0, i_j}^S \cdot 2\Delta \mathsf{sk_i}} =x^{4\Delta^2 d}\pmod {N}$. 
+\paragraph{Combining Shares} Suppose we have valid shares from a set $S$ of players, where $S=\{i_1, \dots, i_k\}\subset \{1, 2, \dots, n\}$. To combine the shares, we compute: 
+\begin{equation*}
+    w=\prod_{j=1}^k \sigma_{i_j}^{2\lambda_{0, i_j}^S} = \prod_{j=1}^k x^{2\lambda_{0, i_j}^S \cdot 2\Delta \mathsf{sk_i}} =x^{4\Delta^2 d}\pmod {N}
+\end{equation*} 
 
 \paragraph{Verification of signature} To verify the signature $w$ using the public key $\mathsf{pk}=e$, it is suffice to check whether $w^e=x^{4\Delta^2}\pmod{N}$ holds. 
 
@@ -86,7 +89,7 @@ BLS threshold signatures are also widely used in real-world applications. In com
 \subsection{Exotic Signatures}
 Threshold signatures involve multiple signers. There are other variants of signature scheme that also involve multiple signers but have different functionalities. Exotic signatures refer to signatures with properties beyond the norm and functionalities of digital signature schemes. They are useful in different application scenarios. 
 
-\subsubsection{Multi Signatures}
+\subsubsection{Multi Signatures} \label{subsubsec:multisig}
 Multi signatures are threshold signatures with the restriction that the threshold $t$ is exactly $n$. A multi signature $\sigma$ on a message $m$ is valid only if all $n$ signers contribute to $\sigma$. 
 
 Using BLS signature, suppose each signer $i$ has secret key $\mathsf{sk}_i = x_i\in \mathbb{Z}_p$ and publishes the public key $\mathsf{pk}_i = g_2^{x_i}\in \mathbb{G}_2$. On input a message $m$, the partial signature of signer $i$ is $H(m)^{x_i} \in \mathbb{G}_1$. From these partial signatures, the aggregated multisignature is defined as $\sigma = \prod_{i=1}^n \sigma_i$. The verification key for the multisignature is $\mathsf{pk} = \prod_{i=1}^n \mathsf{pk}_i$. To verify a multisignature $m$ using the verification key $\mathsf{pk}$, it suffices to check if $e(H(m), \mathsf{pk}) = e(\sigma, g_2)$. 
@@ -97,22 +100,34 @@ Using BLS signature, suppose each signer $i$ has secret key $\mathsf{sk}_i = x_i
 A group signature scheme allows a member of a group to anonymously sign a message on behalf of the group. For example, it can be used by an employee of a large company where a verifier only cares about whether a message was signed by an employee, but does not care about which particular employee signed it. A group signature scheme has a group manager, who is in charge of adding group members and has the ability to reveal the original signer in the event of disputes. 
 
 \subsubsection{Ring Signatures} 
-Similar to group signatures, in a ring signature scheme, any signer $i$ can generate a valid signature on behalf of the whole signer set. There is no group manager and it is computationally difficult to determine the signer even for insiders. Ring signature was proposed by Rivest, Shamir and Tauman in the name of "how to leak a secret"~\cite{DBLP:conf/asiacrypt/RivestST01}, for the application that one member wants to leak a secret of a group but keep his identity secret completely. 
+Similar to group signatures, in a ring signature scheme, any signer $i$ can generate a valid signature on behalf of the whole signer set. There is no group manager and it is computationally difficult to determine the signer even for insiders. Ring signature was proposed by Rivest, Shamir and Tauman in the name of ``how to leak a secret''~\cite{DBLP:conf/asiacrypt/RivestST01}, for the application that one member wants to leak a secret of a group but keep his identity secret completely. 
+
+\paragraph{BGLS Bilinear Ring Signatures} \cite{DBLP:conf/eurocrypt/BonehGLS03} presents a bilinear-pairing based ring signature scheme. The scheme uses a bilinear map $e:\mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$, $\mathbb{G}_1$ and $\mathbb{G}_2$ with generators $g_1$ and $g_2$ respectively, a computable isomorphism $\psi: \mathbb{G}_2 \to \mathbb{G}_1$ such that $\psi(g_2) = g_1$ and a full-domain hash function $H:\{0,1\}^\ast \to \mathbb{G}_1$ modeled as a random oracle in security analysis. Signer $i$ has secret key $\mathsf{sk}_i =  x_i$ and publishes a verification key $\mathsf{pk}_i=g_2^{x_i}$. 
+
+\paragraph{Ring Signing} Suppose a signer $i$ wants to generate a ring signature for a message $m$, he computes $\sigma_i = \big( H(m)/\psi(\prod_{j\neq i} \mathsf{pk}_j^{a_j} ) \big)^{1/{x_i}}$, using public keys of other group members and generating fresh random numbers $a_j$ for all $j\neq i$. For all $j\neq i$, let $\sigma_j=g_1^{a_j}$. The ring signature is $\sigma = <\sigma_1, \dots, \sigma_n>\in \mathbb{G}_1^n$. 
+
+\paragraph{Ring Verification} Given $n$ public keys, a message $m$ and a signature $\sigma$, accept if $e(H(m), g_2) = \prod_{j=1}^n e(\sigma_j, \mathsf{pk}_j)$. 
+
+Informally, this scheme is secure because the generated signature $<\sigma_1, \sigma_2, \dots, \sigma_n>$ has the same distribution with the ``uniform'' random distribution of $\{r_1, \dots, r_n: \prod_{j=1}^n r_j = H(m)\}$. The product of all ``partial signatures'' is fixed, but any set of $n-1$ partial signatures is from a $n-1$-dimensional independently uniform distribution. 
+
+Threshold variants of group/ring signatures are also studied, where only a subset of at least $t$ members can create a valid signature~\cite{DBLP:conf/crypto/BressonSS02}. 
 
 
+\subsubsection{Accountable Threshold Signatures (ATS)}
+\paragraph{Introduction of ATS} In Schnorr and BLS threshold signatures, the verifier cannot identify the subset of signers who generate the signature. They can be called \textit{private threshold signature (PTS) schemes}.  In some applications, accountable threshold signature schemes are desirable, where a signature $\sigma$ on a message $m$ reveals the identity of all $t$ parties who participated in generating the signature. Moreoever, it is not feasible for a quorum of $t$ parties to frame another quorum. The trivial $t$-out-of-$n$ ATS scheme simply defines the public key $\mathsf{pk}$ as the concatenation of all $n$ individual public keys $<\mathsf{pk}_1,\dots, \mathsf{pk}_n>$ and use the concatenation of all $t$ partial signatures as the final signature. This trivial ATS is widely used in practice, such as in the Bitcoin multisig transactions. More efforts have been made to achieve much smaller signature size and verification time, usually in the name of multisignatures~\cite{DBLP:conf/crypto/NickRS21}. 
 
+\paragraph{Threshold signatures with Private Accountability} Recently Boneh and Komlo proposed a new threshold signature scheme called TAPS in \cite{DBLP:conf/crypto/BonehK22}, that is a hybrid of privacy and accountability. A TAPS signature is fully private from the public's point of view. However, any entity that has a secret tracing key $\mathsf{sk}_{trace}$ can provably trace a signature to the set of signers that generated it. If the tracing key $\mathsf{sk}_{trace}$ is made public to all, then a TAPS is no different than an ATS scheme. On the other hand, if $\mathsf{sk}_{trace}$ is destroyed, then a TAPS is no different than a PTS scheme. TAPS is meaningful when $\mathsf{sk}_{trace}$ is known only to a trusted third party, or secret shared among several parties, so that the tracing party can provide accountability in case of a fraudulent transaction for example. 
 
-
-
+{\color{red} TODO If I have time, I will write more details. } 
 
 \subsection{Aggregate Signatures} \label{subsec:aggregate}
 In threshold signatures, a group of $n$ signers try to create signatures for one common message $m$. Aggregate signatures consider the problem of aggregating $n$ signatures of $n$ different messages into a short signature. 
 
-\subsection{BGLS Aggregate Signatures} \cite{DBLP:conf/eurocrypt/BonehGLS03} presents an aggregate signature scheme based on bilinear pairing. Their construction yields a constant size aggregated signature. 
+\paragraph{BGLS Aggregate Signatures} \cite{DBLP:conf/eurocrypt/BonehGLS03} presents an aggregate signature scheme based on bilinear pairing. Their construction yields a constant size aggregated signature. 
 
 \paragraph{Setup} The setup is similar to BLS signatures for $n$ disjoint signers. Choose a bilinear pairing $e:\mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$, where the base groups $\mathbb{G}_1$ and $\mathbb{G}_2$ have prime order $p$ with generators $g_1$ and $g_2$ respectively. Every signer $i$ has a secret key $x_i\in \mathbb{Z}_p$ and the corresponding public key is $y_i = g_2^{x_i}\in \mathbb{G}_2$. All the public keys $y_i$ are publicly known. 
 
-\paragraph{Signing} Each signer $i$ uses his secret key $x_i$ to sign a message $m_i$. The output is a BLG signature $\sigma_i = H(m)^{x_i}\in \mathbb{G}_1$.  
+\paragraph{Signing} Each signer $i$ uses his secret key $x_i$ to sign a message $m_i$. The output is a BLS signature $\sigma_i = H(m)^{x_i}\in \mathbb{G}_1$.  
 
 \paragraph{Aggregation} Upon receiving messages $\{m_i\}_{i\in S}$ and signatures $\{\sigma_i\}_{i\in S}$ from the aggregation subset of signers $S={s_1, s_2,\dots, s_k}$, the aggregator makes sure that the $k$ messages are distinct and computes $\sigma=\prod_{i=S} \sigma_i \in \mathbb{G}_1$. 
 
@@ -123,5 +138,6 @@ In threshold signatures, a group of $n$ signers try to create signatures for one
 {\color{red} TODO add some proof}
 
 \paragraph{Efficiency} Although the size of aggregate signature is only constant, the verifier still has to spend $\Theta(n)$ time. {\color{red} TODO mention the application of SNARKs later}
+
 
 
