@@ -1,4 +1,5 @@
 \section{Cryptography Preliminaries and Digital Signatures} \label{sec:basic}
+In this section, we presents basic cryptography primitives that are components of threshold signatures, including digital signatures, secret sharing and SNARKs. Proofs are omitted in this survey for brevity of presentation.  
 
 \subsection{Digital Signatures}
 
@@ -76,7 +77,7 @@ BLS digital signature was proposed by Boneh, Lynn and Shacham \cite{DBLP:journal
 
 Gap-Diffie-Hellman (GDH) groups are groups where CDH problem is hard but DDH problem is easy. A series of works on the Weil pairing showed the existence of such GDH groups~\cite{DBLP:conf/crypto/BonehF01}. 
 
-\paragraph{Bilinear Pairing} A mapping $e: \mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$ is a bilinear pairing for groups $(\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T)$ of prime order $q$, if $e(g^x, h^y) = e(g, h)^{xy}$ for generators $g$ of $\mathbb{G}_1$ and $h$ of $\mathbb{G}_2$. Bilinear pairings allow efficiently solving the decisional Diffie-Hellman problem even though the computational Diffie-Hellman problem remains intractable. For a CDH problem instance $(g, g^x, g^y, g^z)$, testing $g^z=g^{xy}$ is equivalent to checking $e(g^x, g^y) = e(g, g^z)$, for a non-degenerate, efficiently computable bilinear mapping from $\mathbb{G}\times \mathbf{G}$ to a target group $\mathbb{G}_T$. 
+\paragraph{Bilinear Pairing} A mapping $e: \mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$ is a bilinear pairing for groups $(\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T)$ of prime order $q$, if $e(g^x, h^y) = e(g, h)^{xy}$ for generators $g$ of $\mathbb{G}_1$ and $h$ of $\mathbb{G}_2$. Bilinear pairings allow efficiently solving the decisional Diffie-Hellman problem even though the computational Diffie-Hellman problem remains intractable. For a DDH problem instance $(g, g^x, g^y, g^z)$, testing $g^z=g^{xy}$ is equivalent to checking $e(g^x, g^y) = e(g, g^z)$, for a non-degenerate, efficiently computable bilinear mapping from $\mathbb{G}\times \mathbf{G}$ to a target group $\mathbb{G}_T$. 
 
 \paragraph{Key Generation} Choose a private signing key $\mathsf{sk}=x\in Z_q^\times$. The corresponding public key is $\mathsf{pk}=y=g^x \in \mathbb{G}$. 
 
@@ -133,13 +134,7 @@ When $P_i$ receives his share $(s_i, t_i)$, he verifies that
     \mathsf{commit}(x_i, u_i) = \prod_{j=0}^{t-1} c_i^{i^j}
 \end{equation*}  
 
-{\color{red} TODO write some proof here}
-
-
-
-
-\subsection{Adaptive Security}
-
+If the check passes, $P_i$ accepts his shares. After everyone receives his share, the VSS protocol terminates successfully. 
 
 \subsection{SNARKs}
 While secret sharing, a relatively simple cryptographic primitive, is sufficient for succinct threshold signatures (see constructions in section \ref{sec:threshold}), extensions of threshold signatures usually require more than secret sharing. For unweighted threshold signatures (in section \ref{sec:weighted}) and aggregated signatures (in subsection \ref{subsec:aggregate}), SNARK is a useful cryptographic primitive~\cite{DBLP:conf/ccs/DasCXNB023}. SNARK stands for \textit{Succinct Non-interactive ARgument of Knowledge}. This subsection firstly introduce SNARK briefly and then define it. 

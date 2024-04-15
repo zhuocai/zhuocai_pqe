@@ -21,11 +21,9 @@ Threshold signature scheme involves $n$ signers. The typical setting is that any
 \paragraph{Interaction} In the $\mathsf{Sig}$ phase, $t$ signers might interact with each other. Some threshold signature schemes are interactive and others are non-interactive. Depending on the application scenarios, we might allow interaction among signers. In other cases, it is unrealistic for signers to interact with each other. In non-interactive threshold signature schemes, each signer $i$ generates a partial signature $\sigma_i$ for the message $\mathsf{m}$ using the secret key $\mathsf{sk_i}$. 
 
 \subsection{Fault Tolerance} 
-In the aforementioned setting of threshold signatures, we assume that the group of $t$ signers all honestly follow the protocol. In many real-world settings, a subset of signers might be malicious and deviate from the prescribed protocol in an attempt to prevent generating the desired signature correctly or generate signatures for other messages. We might tolerate up to $k$ maliciously corrupted signers such that any group of $\ge t'=t+k$ signers can guarantee the successful generation of valid signatures for any message, while a group of at most $t-1$ signers cannot create a valid signature for any message. 
+In the aforementioned setting of threshold signatures, we assume that the group of $t$ signers all honestly follow the protocol. In many real-world settings, a subset of signers might be malicious and deviate from the prescribed protocol in an attempt to prevent generating the desired signature correctly or generate signatures for other messages.  
 
-\paragraph{Malicious Tolerance} {\color{red} TODO figure out the setting for malicious partial signatures}
-
-\par In the next subsections, we present a few classical constructions of threshold signatures. Distributing the secret key shares among a group of participants that do not trust each other is a non-trivial task and rely on expensive Distributed Key Generation (DKG) protocols. DKG is not the focus of this survey, therefore our presentation simply assume that there is a trusted dealer that distributes all the secret key shares among the signers. In practice this trusted dealer is replaced with a suitable DKG protocol. 
+\paragraph{Static vs. Adaptive Security} There are two models for fault tolerance. In the first (static) model, the adversary chooses a subset of $t-1$ nodes to corrupt before the protocol starts. In the second (adaptive) model, the adversary can change the set of corrupted nodes during the protocol, as long as there are at most $t-1$ corrupted nodes at any time. 
 
 \subsection{RSA Threshold Signatures}
 The first construction of threshold signature scheme is based on RSA signatures according to~\cite{DBLP:conf/eurocrypt/Shoup00}. 
@@ -34,13 +32,13 @@ The first construction of threshold signature scheme is based on RSA signatures 
 
 \paragraph{Public Key} The dealer chooses a prime exponent $e$ such that $e>n$, and sets the public key $\mathsf{pk}$ as $(N, e)$. 
 
-\paragraph{Secret Key Share} The dealer can compute $d=e^{-1}\pmod{M}$. Then the dealer chooses a random polynomial of degree at most $t'-1$ such that $a_0=d$ and all other coefficients $a_i (1\le i \le t'-1)$ are chosen independently at random. The polynomial is $f(X) = \sum_{i=0}^{t'-1}a_i X^i \in \mathbb{Z}[X]$. 
+\paragraph{Secret Key Share} The dealer can compute $d=e^{-1}\pmod{M}$. Then the dealer chooses a random polynomial of degree at most $t-1$ such that $a_0=d$ and all other coefficients $a_i (1\le i \le t-1)$ are chosen independently at random. The polynomial is $f(X) = \sum_{i=0}^{t-1}a_i X^i \in \mathbb{Z}[X]$. 
 
 \par For $1\le i \le n$, the dealer computes the secret key share of signer $i$ as $\mathsf{sk_i} = f(i)\pmod M$. 
 
 \paragraph{Verification Keys} Note that the secret and shares are integers in $\mathbb{Z}_M$, but $\mathbb{Z}_M$ is not a field because $M$ is composite number. Therefore, \cite{DBLP:conf/eurocrypt/Shoup00} designs additional verification keys in $Q_N$, a subgroup of squares in $Z_N^\times$. $Q_N$ is a cyclic group of order $m$. The dealer chooses a radnom $v\in Q_N$, and computes $v_i=v^{\mathsf{sk_i}}\in Q_N$ for all $i\in \{1, 2, \dots, n\}$. The verification key is $\mathsf{vk}=v$ and the verification key shares are $\mathsf{vk_i}=v_i$. 
 
-\paragraph{Lagrange interpolation} Since $\mathbb{Z}_M$ is not a field, the reconstruction formula slightly deviates from standard Lagrange interpolation. Let $\Delta=n!$. For any subset of $S$ of $t'$ points in $\{0,1,\dots, n\}$, and for any $i\in\{0,1,\dots, n\}\setminus S$ and $j\in S$ , we can define: 
+\paragraph{Lagrange interpolation} Since $\mathbb{Z}_M$ is not a field, the reconstruction formula slightly deviates from standard Lagrange interpolation. Let $\Delta=n!$. For any subset of $S$ of $t$ points in $\{0,1,\dots, n\}$, and for any $i\in\{0,1,\dots, n\}\setminus S$ and $j\in S$ , we can define: 
 \begin{equation*}
     \lambda_{i,j}^S = \Delta \frac{\prod_{j'\in S\setminus\{j\}} (i-j')}{\prod_{j'\in S\setminus \{j\}} (j-j')}\in \mathbb{Z}
 \end{equation*} 
@@ -118,7 +116,9 @@ Threshold variants of group/ring signatures are also studied, where only a subse
 
 \paragraph{Threshold signatures with Private Accountability} Recently Boneh and Komlo proposed a new threshold signature scheme called TAPS in \cite{DBLP:conf/crypto/BonehK22}, that is a hybrid of privacy and accountability. A TAPS signature is fully private from the public's point of view. However, any entity that has a secret tracing key $\mathsf{sk}_{trace}$ can provably trace a signature to the set of signers that generated it. If the tracing key $\mathsf{sk}_{trace}$ is made public to all, then a TAPS is no different than an ATS scheme. On the other hand, if $\mathsf{sk}_{trace}$ is destroyed, then a TAPS is no different than a PTS scheme. TAPS is meaningful when $\mathsf{sk}_{trace}$ is known only to a trusted third party, or secret shared among several parties, so that the tracing party can provide accountability in case of a fraudulent transaction for example. 
 
-{\color{red} TODO If I have time, I will write more details. } 
+% {\color{red} TODO If I have time, I will write more details. } 
+
+TAPS can be constructed from generic SNARKs or special SNARKs tailored for the TAPS problem. Besides its own significance in applications, TAPS is also one example of defining new functionalities of threshold signatures and using SNARKs to achieve the desirable properties. 
 
 \subsection{Aggregate Signatures} \label{subsec:aggregate}
 In threshold signatures, a group of $n$ signers try to create signatures for one common message $m$. Aggregate signatures consider the problem of aggregating $n$ signatures of $n$ different messages into a short signature. 
@@ -135,9 +135,9 @@ In threshold signatures, a group of $n$ signers try to create signatures for one
 \begin{equation*}
     e(\sigma, g_2) = e(\prod_{i\in S}H(m_i)^{x_i}, g_2) = \prod_{i\in S} e(H(m_i), g_2)^{x_i} = \prod_{i\in S}e(H(m_i), g_2^{x_i}) %= \prod_{i\in S} e(H(m_i), y_i) 
 \end{equation*}
-{\color{red} TODO add some proof}
+% {\color{red} TODO add some proof}
 
-\paragraph{Efficiency} Although the size of aggregate signature is only constant, the verifier still has to spend $\Theta(n)$ time. {\color{red} TODO mention the application of SNARKs later}
+\paragraph{Efficiency} Although the size of aggregate signature is only constant, the verifier still has to spend $\Theta(n)$ time. Improving the efficiency using SNARKs is one of my future directions, explained in section \ref{sec:future-aggregate}. %{\color{red} TODO mention the application of SNARKs later} 
 
 
 
