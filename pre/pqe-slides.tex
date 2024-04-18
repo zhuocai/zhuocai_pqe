@@ -1,0 +1,383 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Welcome to Overleaf --- just edit your LaTeX on the left,
+% and we'll compile it for you on the right. If you open the
+% 'Share' menu, you can invite other users to edit at the same
+% time. See www.overleaf.com/learn for more info. Enjoy!
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{beamer}
+\usetheme{Berlin}
+\usecolortheme{beaver}
+%Information to be included in the title page:
+\title{Threshold Signatures: Efficient Constructions and Applications in Blockchains}
+\author{Zhuo Cai}
+\institute{PQE of Department of Computer Science, HKUST}
+\date{April 30, 2024}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+% toc
+\AtBeginSection[]
+{
+\begin{frame}
+\frametitle{Table of Contents}
+\tableofcontents
+\end{frame}
+}
+
+\section{Introduction}
+\begin{frame}
+\frametitle{Background: Digital Signatures}
+
+In cryptocurrencies, everyone has a pair of public/secret keys. \\
+Alice has $\mathsf{pk}_A \sim \mathsf{sk}_A$.  Others know $\mathsf{pk}_A$, but only Alice knows $\mathsf{sk}_A$. \\
+\begin{examples}
+    Alice wants to pay 1 coin to Bob and propagates a message ``Alice pays 1 coin to Bob''. \\
+    Can Alice spend Bob's coin by broadcasting ``Bob pays 2 coins to Alice''? \\
+\end{examples}
+\pause
+Alice should not be able to add the message to blockchain. \\ \pause
+\vspace{1em}
+How can we prevent Alice from spending Bob's coins? \\ \pause
+- Alice should sign on her message: a digital signature $\sigma_A$ generated using secret key $\mathsf{sk}_A$, and can be verified using $\mathsf{pk}_A$. \\ \pause
+- Alice cannot forge Bob's signature to spend Bob's coins. 
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Multi Sinatures}
+Alice and Bob jointly own a coin $c$. Only if Alice and Bob both agree, the coin $c$ can be spent. \\ \pause
+Solution: 
+\begin{itemize}
+    \item Alice signs on $m=$``A\&B transfer coin $c$ to Carol'': $\sigma_A(m)$. 
+    \item Bob also signs on $m=$``A\&B transfer coin $c$ to Carol'': $\sigma_B(m)$. 
+    \item (Verification): The miner includes $m$ only if he sees both $\sigma_A(m)$ and $\sigma_B(m)$. 
+\end{itemize}
+\begin{block}{Multi Signatures} 
+    For a group of $n$ members, $\{P_1, P_2,\dots, P_n\}$, a signature is valid if only if all $n$ members all agree to generate it.  
+\end{block}
+\end{frame}
+
+\begin{frame}{Threshold Signatures}
+Alice, Bob and Carol are committee members of company that controls many coins. {\color{red} Any two of them} can spend these coins. \\ \pause 
+Solution: (When Alice and Carol agree to donate a coin to HKUST) 
+\begin{itemize}
+    \item Alice and Carol each signs on $m$: $\sigma_A(m), \sigma_C(m)$. 
+    \item (Verification): the miner includes $m$ if he sees two of $\{\sigma_A(m),\sigma_B(m), \sigma_C(m)\}$. 
+\end{itemize}
+\begin{block}{Threshold Signatures} 
+    For a group of $n$ members, $\{P_1, P_2,\dots, P_n\}$, a signature is valid if only if a subset of \textit{at least} $t$ members agree to generate it.  
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Efficiency}
+Is the previous na\"ive threshold signature efficient? ($t=\Theta(n)$)\\
+\begin{itemize}
+    \item Signature generation time: $O(n)$. 
+    \item Signature size: $O(n)$. 
+    \item Verification time: $O(n)$. 
+\end{itemize}
+\pause 
+
+Settings: 
+\begin{itemize}
+\item  A signature is verified many times (all blockchain nodes have to verify each transaction). \\
+- Try reducing the signature size/verification time, even at the cost of slow generation time. \pause 
+\item The group might generate many signatures! \\
+- Try reducing the cost of each signature (Gen+Ver), even at the cost of some expensive setup/precomputation. 
+\end{itemize}
+\end{frame}
+
+\section{Threshold Signatures}
+
+\begin{frame}{Component 1: digital signature scheme}
+\begin{block}{Digital Signature Scheme: $\mathsf{SGN} = \mathsf{(Setup, Gen, Sig, Ver)}$}
+    \begin{itemize}
+        \item $\mathsf{Setup(1^\lambda)\to par}$
+        \item $\mathsf{Gen(par)\to (pk, sk)}$
+        \item $\mathsf{Sig(sk,m)\to \sigma}$
+        \item $\mathsf{Ver(pk,m,\sigma)\to b}$
+    \end{itemize}
+\end{block}
+\textbf{Correctness}: $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, \mathsf{Ver(pk, m, Sig(sk, m))}]=1$. \\
+\textbf{EUF-CMA Security} (Existentially Unforgeable under Chosen Message Attack): any probabilistic polynomial time algorithm can forge a signature for a new message with only negligible probability $o(1/poly(\lambda))$. \\
+\vspace{1em}
+Examples: RSA, ElGamal, Schnorr, \textbf{BLS}, EdDSA. 
+\end{frame}
+
+\begin{frame}{Discrete-Log Problem}
+A large family of cryptography is based on the hardness of the discrete-log problem. 
+\vspace{0.5em}
+
+Using a cyclic multiplicative group $\mathbb{G}$, with a generator $g$ of prime order $q$, $\mathbb{G} = \{1, g, g^2, g^3,\dots, g^{q-1}\}$. \\
+$\mathbb{G}$ can be a subgroup of a multiplicative group $\mathbb{Z}_p^\times$, or elliptic curves. \\
+\pause 
+\vspace{0.4em}
+Let $\lambda = \log q$. \\
+- Given any input $x\in \mathbb{Z}_{p} =\{0,1,\dots, q-1\}$, it's efficient ($poly(\lambda)$ time) to compute $y=g^x\in \mathbb{G}$. 
+
+\pause
+\begin{block}{Discrete-Log Problem (DL)}
+Given a random $y\in \mathbb{G}$, output $x\in \mathbb{Z}_q$ such that $g^x=y$. 
+\end{block}
+
+Best known algorithms take subexpoential ($exp(\lambda^c)$) time. 
+\end{frame}
+
+\begin{frame}{Diffie-Hellman Problem}
+\begin{block}{Computational Diffie-Hellman Problem (CDH)}
+    Given $(g, u, v)$, three random elements of $\mathbb{G}$, to compute $h=g^{\log_g u \log_g v}$. 
+\end{block}
+\pause 
+Difficulty of CDH $\le$ difficulty of DL. If DL is easy, then $\log_g u$
+ and $\log_g v$ can be computed efficiently. \pause
+
+\begin{block}{Decisional Diffie-Hellman Problem (DDH)}
+    Given $(g, u, v, h)$, four elements of $\mathbb{G}$, which with equal probability can be either all random elements of $\mathbb{G}$ or have the property that $\log_g u = \log_v h$, to output $0$ in the former case and $1$ in the latter case. 
+\end{block}
+\pause
+Difficulty of DDH $\le$ difficulty of CDH. If CDH is easy, then computing $g^{\log_g u \log_g v}$ and comparing with $h$ is an efficient algorithm for DDH.  
+
+\end{frame}
+
+\begin{frame}{BLS Signature [BLS'04]} 
+\begin{block}{BLS Digital Signature}
+    \begin{itemize}
+        \item Setup: (1) a cyclic multiplicative group $\mathbb{G}$ with a generator $g$ of prime order $q$. (2) a cryptographic hash function $H:\{0,1\}^\ast \to \mathbb{G}$. 
+        \item Gen: select a random $x\in \mathbb{Z}_{q}$, secret key is $x$, public key is $y=g^x \in \mathbb{G}$. 
+        \item Sgn: a message $m$ $\to$ a signature $\sigma = H(m)^x \in \mathbb{G}$. 
+        \item Ver: given a message $m$, a signature $\sigma$, a public key $y=g^x$, determine whether $\sigma = H(m)^{\log_g y}$.   
+    \end{itemize}
+\end{block} \pause
+\textbf{Unforgeablility}: the forging problem is a CDH problem, with input $(g, g^x, H(m))$.  \\ \pause
+
+\textbf{Correctness}: How can a verifier check $\sigma = H(m)^{\log_g y}$? \\
+- It is actually a DDH problem, with input $(g, g^x, H(m), \sigma)$. 
+\end{frame}
+
+\begin{frame}{Gap-DH and Bilinear Pairing}
+Gap-DH group: if in a group $\mathbb{G}$, the CDH problem is hard but DDH problem is easy. \\
+\pause
+Works on Weil pairing showed the existence of such GDH groups [BFM'01]. \\
+\pause 
+\begin{block}{Bilinear Pairing}
+    A mapping $e: \mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$ is a bilinear map for groups $(\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T)$ with generators $g_1, g_2, g_T$ of prime order $q$, if it is:
+    \begin{itemize}
+        \item bilinear: $e(g_1^x, g_2^y) = e(g_1, g_2)^{xy}$. 
+        \item non-degenerate: $e(g_1, g_2)\neq 1_{\mathbb{G}_T}$. 
+        \item efficient: there is an efficient algorithm to compute $e(g_1^x, g_2^y)$. 
+    \end{itemize}
+\end{block}
+\pause 
+With a bilinear pairing from $\mathbb{G}\times \mathbb{G}$, a DDH problem for $(g, g^x, H(m),\sigma)$ is efficiently solved by checking $e(g, \sigma) = e(g^x, H(m))$.
+\end{frame}
+
+\begin{frame}{Component 2: Shamir's secret sharing}
+\textbf{(Threshold) secret sharing}: share a secret $x$ among $n$ parties $\{P_1,P_2,\dots, P_n\}$. \\
+\begin{itemize}
+\item Each party $P_i$ knows a share of the secret $x_i$. \\
+\item Any subset of $>=t$ parties can collaborate to reconstruct $x$ using their shares. \\
+\item Any subset of $<t$ parties cannot reconstruct $x$. 
+\end{itemize}
+\pause 
+
+\vspace{0.5em}
+\textbf{Very simple construction}: use a univariate polynomial $f(x)=a_0 + a_1 x+\cdots a_{t-1}x^{t-1}$ of degree $\le t-1$. \\
+\begin{itemize}
+    \item Choose $f$ such that $f(0)=a_0=x$, but other coefficients are uniformly at random. 
+    \item Send $f(i)$ to $P_i$, for $i\in\{1,2,\dots,n\}$. 
+    \item Reconstruction (Lagrange interpolation) using $t$ shares $\{(j_k, x_{j_k})\}_{k=1}^t$: \begin{equation*} 
+        f(x) = \sum_{k=1}^{t}\frac{\prod_{i \neq k } (x - j_i)}{\prod_{i \neq k } (j_k - j_i)}\cdot x_{j_k} = \sum_{k=1}^t \lambda_{j_k}(x) x_{j_k}
+    \end{equation*}  
+\end{itemize}
+\end{frame}
+
+% \begin{frame}{Verifiable secret sharing}
+    
+% \end{frame}
+
+\begin{frame}{BLS threshold signature}
+    \vspace{-0.5em}
+\begin{itemize}
+    \item Setup: same as BLS signature. 
+    \item Gen: (suppose there is a trusted dealer) choose a random $x\in \mathbb{Z}_{q}$ as the secret key, distribute the shares $x_i$ to $P_i$. The public key is $y=g^x\in \mathbb{G}$. 
+    \item Sig: suppose $\{P_{j_1}, P_{j_2},\dots, P_{j_t}\}$ collaborate. Each $P_{j_i}$ generates \textit{partial signature} $\sigma_{j_i}=H(m)^{x_{j_i}}$. To compute $\sigma = H(m)^{x}$ (without revealing $x$ to anyone):\vspace{-0.5em} 
+    \begin{equation*}
+        \sigma = H(m)^{f(0)} = H(m)^{\sum_{i=1}^t \lambda_{j_i}(0) x_{j_i}} = \prod_{i=1}^t (H(m)^{x_{j_i}})^{\lambda_{S, j_i}(0)} = \prod_{i=1}^t \sigma_{j_i}^{\lambda_{S, j_i}(0)}
+    \end{equation*}
+    \vspace{-0.3em}
+    \item Ver: same as BLS signature, using $\mathsf{sk}=y$: $e(g, \sigma)=e(y, H(m))$. 
+\end{itemize}
+\vspace{0.5em}
+\pause 
+Very efficient: $O(1)$ signature size; $O(1)$ verification time. Gen: $O(t\log^2 t)$ NTT (number-theoretic transform). 
+\end{frame}
+
+\begin{frame}{Others}
+    \begin{itemize}
+        \item \textbf{Schnorr threshold signature} is also popular. It does not require bilinear pairing, but is interactive (incurs round complexity). 
+        \item \textbf{(Threshold) Group/Ring signature}: any (subset of) member can generate a signature on behalf of the group, but no one knows which member generated it. 
+        \item \textbf{Static vs. Adaptive Security}: whether the adversary controls fixed $t-1$ nodes throughout the protocol, or can change the set of corrupted nodes. 
+    \end{itemize}
+\end{frame}
+
+\section{Distributed Key Generation}
+\begin{frame}{DKG to setup threshold signatures}
+    In BLS threshold signature, we assume that a trusted dealer choooses a random $x$ and distributes the shares among $\{P_1,\dots, P_n\}$. \\
+    \begin{itemize}
+        \item the dealer might distribute wrong shares! \\ \pause 
+              - \textbf{verifiable} secret sharing: prove that shares/reconstruction are correct.   \pause 
+        \item the dealer knows $x$! With $x$, he can create a signature by himself. \\ \pause
+            - Remove the dealer, use a distributed key generation (DKG) protocol. 
+    \end{itemize}
+    \pause 
+    \vspace{0.5em}
+    Intuition of DKG: nobody should know $x$, then let $P_1$ selects $s_1$ and $P_2$ selects $s_2$, define $x=s_1+s_2$. \\ \pause 
+    \vspace{0.5em}
+    Issue: what if $P_1$ and $P_2$ collude with each other? \\ \pause 
+    Solution: let every $P_i$ choose $s_i$, so that $x=s_1+s_2+\cdots s_n$. Every $P_i$ shares $s_i$ with others using VSS.  [Pedersen'91]
+\end{frame}
+
+\begin{frame}{Asynchronous DKG}
+Fault tolerant distributed protocols are expensive! Consider the cost of one node broadcasting a message to all members: 
+\begin{itemize}
+    \item In synchronous networks (messages are delivered with known bounded delays) ($n=2t+1$): $O(n^2)$ communication. 
+    \item In asynchronous networks (messages are might be delayed arbitrarily long) ($n=3t+1$): $O(n^2)$ communication. 
+\end{itemize}
+ADKG complexity of [Das etc. S\&P'22]: $O(\kappa n^3)$ total communication, where $\kappa$ is the output size of a cryptographic hash function. \\
+ADKG might be the performance bottleneck of threshold signatures. \\
+\vspace{0.5em}
+Recent research tries to improve ADKG, that ideally requires $O(n^2)$ communication. 
+\end{frame}
+
+\section{SNARKs}
+\begin{frame}{Limitations of BLS threshold signature}
+\begin{itemize}
+    \item Unweighted: every member has the same unit weight. \\
+        - In cryptocurrencies (Proof-of-Stake), accounts have (vastly) different weights. \\
+        - Virtualization approach: suppose $P_1$ has weight 1 and $P_2$ has weight $10,000$, then $P_2$ should own $10,000$ secret shares in TS. \pause 
+    \item Fixed threshold: each polynomial (secret shares) corresponds to a fixed threshold $t$. For another threshold, we should setup another polynomial (and secret shares). 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Succinct Non-interactive ARgument of Knowledge (Informal)}
+\textbf{Verifiable computing}: for some computation $f$, while computing/evaluating $f(x)$ given input $x$ might take $1$ year, given $(x, y)$ verifying that $y=f(x)$ might take only $1$ second. 
+
+SNARKs approach: firstly compile the computation to a circuit satisfiability problem (CSP). 
+
+\begin{block}{Circuit Satisfiability Problem}
+Arithmetic circuit $C$. \\
+Language $\mathcal{L}_{C}$: $\{ x: \exists$ a witness $w$, such that $C(x, w) = 0\}$.  \\
+Relation $\mathcal{R}_C$: $\{(x, w): C(x, w)=0\}$. 
+\end{block}
+
+$\mathcal{P}$ proves to $\mathcal{V}$ that $x\in \mathcal{L}_C$. \\
+
+    
+\end{frame}
+
+\begin{frame}{SNARKs (continued)}
+\textbf{Polynomial commitment scheme}: the witness $w$ might be long. $\mathcal{P}$ represents $w$ using a polynomial extension $\tilde{w}$, and only sends a $O(1)$ sized commitment of $\tilde{w}$ to $\mathcal{V}$. When $\mathcal{V}$ queries $\tilde{w}(r)$, $\mathcal{P}$ replies with the value and a proof, both succinct. 
+
+\textbf{Interactive Oracle Proofs} (for CSP): $\mathcal{P}$ and $\mathcal{V}$ interact a few round, $\mathcal{V}$ queries the polynomial committed by $\mathcal{P}$. While $\mathcal{P}$ might check $|C|$ constraints, $\mathcal{V}$ only checks a few ($O(1)$). 
+
+\textbf{Non-interactive} a proof can be reused for many different verifiers, that do not need to interact with the prover. 
+
+\begin{itemize}
+    \item Proof size: a succinct commitment $c_w$ of $w$ + a SNARK proof $\pi$. $|c_w|$ and $\pi$ can be $O(1)$ field elements. 
+    \item Verification time: $O(1)$ field operation + $|x|$ to read the input.
+    \item Prover time: ideally only slightly more than the time to evaluate the circuit.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Generic SNARK for weighted, multi-threshold TS}
+$\mathbf{pk} = [\mathsf{pk}_1, \mathsf{pk}_2,\dots, \mathsf{pk}_n]$, $\mathbf{w} = [w_1, w_2, \dots, w_n]$ \\
+The verifier agree and can access $\mathbf{pk}$, $\mathbf{w}$ via succinct commitments. \\ \pause
+\vspace{0.5em}
+A subset $S$ of $\{P_1, \dots, P_n\}$ generate partial signatures $\sigma_i = H(m)^{x_i}$. \\ \pause
+
+\begin{block}{CSP for WTS}
+Input for $\mathcal{V}$ to read: $x = (m, t, c_{\mathbf{pk}}, c_{\mathbf{w}}, c_{S}, c_{\sigma_{S}})$ \\
+The witness: $w = (\mathbf{pk}, \mathbf{w}, S, \sigma_S)$ \\
+The relation $\mathcal{R}_{WTS}$: 
+\begin{equation*}
+    \begin{matrix}
+        \mathbf{pk}\in \mathbb{G}^n; c_{\mathbf{pk}} = \mathsf{commit}(\mathbf{pk})\\
+        \mathbf{w}\in \mathbb{F}^n, ||\mathbf{w}||_1<|\mathbb{F}|;  c_{\mathbf{w}} = \mathsf{commit}(\mathbf{w})\\
+        S\subseteq \{1,2,\dots, n\}; c_{S} = \mathsf{commit}(S)\\
+        \sigma_{S} \in \mathbb{G}^{|S|} ;c_{\sigma_{S}} = \mathsf{commit}(\sigma_S) \\
+        \forall i\in S, e(H(m), \mathsf{pk}_i) = e(\sigma_i, g) \\
+        t = \sum_{i\in S} w_i  \\
+    \end{matrix}
+\end{equation*}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Specialized SNARK for weighted, multi-threshold TS}
+\textbf{Special SNARKs} Generic SNARKs are designed for a general class of problems (arithmetic circuit satisfiability problem/R1CS). They might not be optimal for a particular class of problems. \\
+% \pause 
+% [Das etc. CCS'23] designs a weighted, multi-threshold TS using inner product argument. 
+
+\textbf{Inner Product Argument (IPA)}: prove that $\langle \mathbf{a}, \mathbf{b}\rangle =c$, $\mathbf{a},\mathbf{b}\in \mathbb{F}^n$. Verifiers can access the commitment of $\mathbf{a}$ and $\mathbf{b}$. 
+\pause
+\begin{itemize}
+    \item  Let $\mathbf{b} = [b_1, b_2,\dots, b_n]\in \{0,1\}^n$, $b_i=1$ if $P_i$ generates a partial signature $\sigma_i = H(m)^{x_i}$. 
+    \item The aggregate signature $\sigma_{\mathbf{b}} = \prod_{b_i=1} \sigma_i = H(m)^{\langle\mathbf{x}, \mathbf{b}\rangle}$. Verification key is $\prod_{b_i=1}y_i = g^{\langle\mathbf{x}, \mathbf{b}\rangle}$. \\
+        - However, the aggregator should not learn the secret keys $x_i$. So they use general IPA for $\langle\mathbf{\sigma}, \mathbf{b}\rangle$ and $\langle\mathbf{y}, \mathbf{b}\rangle$. One vector is in the field $\mathbb{F}$, the other in the group $\mathbb{G}$. 
+    \item The total weight is $\langle\mathbf{w}, \mathbf{b}\rangle$. 
+\end{itemize}
+
+
+Result[CCS'23]: the prover complexity is more practical. 
+\end{frame}
+
+\section{Future Works}
+
+\begin{frame}{Topic 1: succinct aggregate signatures and democratic voting}
+\textbf{Aggregate Signatures}  $n$ members may sign different messages. $P_i$ creates a signature for $m_i$: $H(m)^{x_i}$. \\
+How to aggregate these signatures to one short proof? \\
+\vspace{0.5em}
+\pause 
+\textbf{Democratic voting} Suppose the group votes for a leader and there are multiple candidates. \\
+A candidate wins if he receives the most votes, not necessarily $>50\%$. \\
+A proof of candidate winning with $40\%$ votes should show that all other candidates receives $<40\%$ votes. \\
+\pause 
+\vspace{0.5em}
+Generic SNARK works, maybe special SNARKs can make further improvement. 
+\end{frame}
+
+\begin{frame}{Topic 2: incremental DKG}
+    If only a few new members join or a few old members leave, can we do better than rerun the complete DKG protocol again (the total communication cost is $O(\kappa n^3))$? \\
+\end{frame}
+
+\begin{frame}{Topic 3: alternative multi-threshold cryptosystem}
+    Current (BLS) threshold signatures are based on signatures where verification result is binary. \\
+    A signature is either valid or invalid. \\
+    \vspace{0.5em} 
+    What if the verification step returns a value in range $[0,1]$? \\
+    Discrete-log cryptography might not achieve this. What about lattice cryptography, or another family of hard problems?  
+\end{frame}
+
+\begin{frame}{Summary}
+    \begin{itemize}
+        \item BLS threshold signature, based on BLS signature and secret sharing.
+        \item Weighted, multi-threshold TS, based on generic/special SNARKs. 
+        \item DKG, efficient asynchronous DKG, incremental DKG. 
+        \item Alternative multi-threshold cryptosystem. 
+    \end{itemize}
+\end{frame}
+
+\end{document}

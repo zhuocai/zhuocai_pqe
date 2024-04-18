@@ -6,6 +6,10 @@
 *.fdb_latexmk
 *.fls
 *.log
+*.out
+*.nav
+pre/pqe-slides.pdf
+*.snm
 
 *.gz
 *.toc
