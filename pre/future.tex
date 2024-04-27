@@ -1,0 +1,39 @@
+\section{Future Works}
+%\frame{\tableofcontents[currentsection]}
+
+
+\begin{frame}{Topic 1: succinct aggregate signatures and democratic voting}
+\textbf{Aggregate Signatures}  $n$ members may sign different messages. $P_i$ creates a signature for $m_i$: $H(m)^{x_i}$. \\
+How to aggregate these signatures to one short proof? \\
+\vspace{0.5em}
+\pause 
+\textbf{Democratic voting} Suppose the group votes for a leader and there are multiple candidates. \\
+A candidate wins if he receives the most votes, not necessarily $>50\%$. \\
+A proof of candidate winning with $40\%$ votes should show that all other candidates receives $<40\%$ votes. \\
+\pause 
+\vspace{0.5em}
+Generic SNARK works, maybe special SNARKs can make further improvement. 
+\end{frame}
+
+\begin{frame}{Topic 2: incremental DKG}
+    If only a few new members join or a few old members leave, can we do better than rerun the complete DKG protocol again (the total communication cost is $O(\kappa n^3))$? \\
+\end{frame}
+
+\begin{frame}{Topic 3: alternative multi-threshold cryptosystem}
+    Current (BLS) threshold signatures are based on signatures where verification result is binary. \\
+    A signature is either valid or invalid. \\
+    \vspace{0.5em} 
+    What if the verification step returns a value in range $[0,1]$? \\
+    Discrete log cryptography might not achieve this. What about lattice cryptography, or another family of hard problems?  
+\end{frame}
+
+
+
+\begin{frame}{Summary}
+    \begin{itemize}
+        \item BLS threshold signature, based on BLS signature and secret sharing.
+        \item Weighted, multi-threshold TS, based on generic/special SNARKs.
+        \item DKG, efficient asynchronous DKG, incremental DKG. 
+        \item Alternative multi-threshold cryptosystem. 
+    \end{itemize}
+\end{frame}

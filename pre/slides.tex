@@ -1,0 +1,54 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Welcome to Overleaf --- just edit your LaTeX on the left,
+% and we'll compile it for you on the right. If you open the
+% 'Share' menu, you can invite other users to edit at the same
+% time. See www.overleaf.com/learn for more info. Enjoy!
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[8pt]{beamer}
+\usetheme{Berlin}
+\usecolortheme{beaver}
+
+\usepackage[style=alphabetic]{biblatex}
+
+\bibliography{../reference.bib}
+
+%Information to be included in the title page:
+\title{Threshold Signatures: Efficient Constructions and Applications in Blockchains}
+\author{Zhuo Cai}
+\institute{Department of Computer Science, HKUST}
+\date{April 30, 2024}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+% toc
+\AtBeginSection[]
+{
+\begin{frame}
+\frametitle{Table of Contents}
+\tableofcontents[currentsection]
+\end{frame}
+}
+
+\input{intro.tex}
+\input{thres.tex}
+\input{dkg.tex}
+\input{snark.tex}
+\input{future.tex}
+
+\begin{frame}[allowframebreaks]{Reference}
+\printbibliography
+\end{frame}
+\end{document}

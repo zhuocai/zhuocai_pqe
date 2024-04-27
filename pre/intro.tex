@@ -1,0 +1,70 @@
+
+\section{Introduction}
+%\frame{\tableofcontents[currentsection]}
+
+\begin{frame}
+\frametitle{Background: Digital Signatures}
+
+In cryptocurrencies, everyone has a pair of public/secret keys. \\
+Alice has $\mathsf{pk}_A$ and $\mathsf{sk}_A$.  Others know $\mathsf{pk}_A$, but only Alice knows $\mathsf{sk}_A$. \\
+\begin{examples}
+    Alice wants to pay 1 coin to Bob and propagates a message ``Alice pays 1 coin to Bob''. \\
+    Can Alice spend Bob's coin by broadcasting ``Bob pays 2 coins to Alice''? \\
+\end{examples}
+\pause
+Alice should not be able to add the message to blockchain. \\ \pause
+\vspace{1em}
+How can we prevent Alice from spending Bob's coins? \\ \pause
+- Alice should sign on her message: a digital signature $\sigma_A$ generated using secret key $\mathsf{sk}_A$, and can be verified using $\mathsf{pk}_A$. \\ \pause
+- Alice cannot forge Bob's signature to spend Bob's coins. 
+
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Multi Signatures}
+    Alice and Bob jointly own a coin $c$. Only if Alice and Bob both agree, the coin $c$ can be spent. \\ \pause
+    Solution: 
+    \begin{itemize}
+        \item Alice signs on $m=$``A\&B transfer coin $c$ to Carol'': $\sigma_A(m)$. 
+        \item Bob also signs on $m=$``A\&B transfer coin $c$ to Carol'': $\sigma_B(m)$. 
+        \item (Verification): The miner includes $m$ only if he sees both $\sigma_A(m)$ and $\sigma_B(m)$. 
+    \end{itemize}
+    \begin{block}{Multi Signatures} 
+        For a group of $n$ members, $\{P_1, P_2,\dots, P_n\}$, a signature is valid if only if all $n$ members all agree to generate it.  
+    \end{block}
+    \end{frame}
+    
+    \begin{frame}{Threshold Signatures}
+    Alice, Bob and Carol are committee members of company that controls many coins. {\color{red} Any two of them} can spend these coins. \\ \pause 
+    Solution: (When Alice and Carol agree to donate a coin to HKUST) 
+    \begin{itemize}
+        \item Alice and Carol each signs on $m$: $\sigma_A(m), \sigma_C(m)$. 
+        \item (Verification): the miner includes $m$ if he sees two of $\{\sigma_A(m),\sigma_B(m), \sigma_C(m)\}$. 
+    \end{itemize}
+    \begin{block}{Threshold Signatures} 
+        For a group of $n$ members, $\{P_1, P_2,\dots, P_n\}$, a signature is valid if only if a subset of \textit{at least} $t$ members agree to generate it.  
+    \end{block}
+    \end{frame}
+
+
+
+\begin{frame}{Efficiency}
+    Is the previous na\"ive threshold signature efficient? ($t=\Theta(n)$ e.g. $t=(n-1)/2$)\\
+    \begin{itemize}
+        \item Signature generation time: $\Theta(n)$. 
+        \item Signature size: $\Theta(n)$. 
+        \item Verification time: $\Theta(n)$. 
+    \end{itemize}
+    \pause 
+    
+    Settings: 
+    \begin{itemize}
+    \item  A signature is verified many times (all blockchain nodes have to verify each transaction). \\
+    - Try reducing the signature size/verification time, even at the cost of slow generation time. \pause 
+    \item The group might generate many signatures! \\
+    - Try reducing the cost of each signature (Gen+Ver), even at the cost of some expensive setup/precomputation. 
+    \end{itemize}
+    \end{frame}
+    

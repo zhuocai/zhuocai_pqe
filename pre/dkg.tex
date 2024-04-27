@@ -1,0 +1,33 @@
+\section{Distributed Key Generation}
+%\frame{\tableofcontents[currentsection]}
+
+
+\begin{frame}{DKG to setup threshold signatures}
+    In BLS threshold signature, we assume that a trusted dealer choooses a random $x$ and distributes the shares among $\{P_1,\dots, P_n\}$. \\
+    \begin{itemize}
+        \item the dealer might distribute wrong shares! \\ \pause 
+              - \textbf{verifiable} secret sharing: prove that shares/reconstruction are correct.   \pause 
+        \item the dealer knows $x$. With $x$, he can create a signature by himself. \\ \pause
+            - Remove the dealer, use a distributed key generation (DKG) protocol. 
+    \end{itemize}
+    \pause 
+    \vspace{0.5em}
+    Intuition of DKG: nobody should know $x$, then let $P_1$ select $s_1$ and $P_2$ select $s_2$, define $x=s_1+s_2$. \\ \pause 
+    \vspace{0.5em}
+    Issue: what if $P_1$ and $P_2$ collude with each other? \\ \pause 
+    Solution: let every $P_i$ choose $s_i$, so that $x=s_1+s_2+\cdots s_n$. Every $P_i$ shares $s_i$ with others using VSS.  [Pedersen'91]
+\end{frame}
+
+
+
+\begin{frame}{Asynchronous DKG}
+    Fault tolerant distributed protocols are expensive! Consider the cost of one node broadcasting a message to all nodes ($n$ is the number of all nodes and $t$ is the number of corrupted nodes): 
+    \begin{itemize}
+        \item In synchronous networks (messages are delivered with known bounded delays) ($n=2t+1$): $O(n^2)$ communication. 
+        \item In asynchronous networks (messages are might be delayed arbitrarily long) ($n=3t+1$): $O(n^2)$ communication. 
+    \end{itemize}
+    ADKG complexity of ~\cite{DBLP:conf/sp/DasYXMK022}\footfullcite{DBLP:conf/sp/DasYXMK022}: $O(\kappa n^3)$ total communication, where $\kappa$ is the output size of a cryptographic hash function. \\
+    ADKG might be the performance bottleneck of threshold signatures. \\
+    \vspace{0.5em}
+    Recent research tries to improve ADKG, that ideally requires $O(n^2)$ communication. 
+    \end{frame}

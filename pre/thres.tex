@@ -1,0 +1,133 @@
+
+\section{Threshold Signatures}
+% \frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Component 1: digital signature scheme}
+\begin{block}{Digital Signature Scheme: $\mathsf{SGN} = \mathsf{(Setup, Gen, Sig, Ver)}$}
+\begin{itemize}
+\item $\mathsf{Setup(1^\lambda)\to par}$ (probabilistic)
+\item $\mathsf{Gen(par)\to (pk, sk)}$ (probabilistic)
+\item $\mathsf{Sig(sk,m)\to \sigma}$ (probabilistic)
+\item $\mathsf{Ver(pk,m,\sigma)\to b}$ (deterministic)
+\end{itemize}
+\end{block}
+\textbf{Correctness}: $Pr[(\mathsf{pk}, \mathsf{sk})\leftarrow \mathsf{Gen(par)}, \mathsf{Ver(pk, m, Sig(sk, m))}]=1$. \\
+\textbf{EUF-CMA Security} (Existentially Unforgeable under Chosen Message Attack): any probabilistic polynomial time algorithm ($poly(\lambda)$ time) can forge a signature for a new message with only negligible probability $o(1/poly(\lambda))$. \\
+\vspace{1em}
+Examples: RSA, ElGamal, Schnorr, \textbf{BLS}, EdDSA. 
+\end{frame}
+
+
+\begin{frame}{Discrete log Problem}
+Many cryptography protocols are based on the hardness of the discrete log problem. 
+\vspace{0.5em}
+
+Using a cyclic multiplicative group $\mathbb{G}$, with a generator $g$ of prime order $q$, $\mathbb{G} = \{1, g, g^2, g^3,\dots, g^{q-1}\}$. \\
+$\mathbb{G}$ can be a subgroup of a multiplicative group $\mathbb{Z}_p^\times$, or elliptic curves. \\
+\pause 
+\vspace{0.4em}
+Let $\lambda = \log q$. \\
+- Given any input $x\in \mathbb{Z}_{p} =\{0,1,\dots, q-1\}$, it's efficient ($poly(\lambda)$ time) to compute $y=g^x\in \mathbb{G}$. 
+
+\pause
+\begin{block}{Discrete log Problem (DL)}
+Given a random $y\in \mathbb{G}$, output $x\in \mathbb{Z}_q$ such that $g^x=y$. 
+\end{block}
+
+Best known algorithms for DL in arbitrary elliptic curve groups of size $q$ bits take $O(\sqrt{q}) = O(\exp(\lambda/2))$ time~\footfullcite{DBLP:journals/ffa/AmadoriPS18}. 
+\end{frame}
+
+
+\begin{frame}{Diffie-Hellman Problem}
+\begin{block}{Computational Diffie-Hellman Problem (CDH)}
+Given $(g, u, v)$, three random elements of $\mathbb{G}$, to compute $h=g^{\log_g u \log_g v}$. 
+\end{block}
+\pause 
+Difficulty of CDH $\le$ difficulty of DL. If DL is easy, then $\log_g u$
+and $\log_g v$ can be computed efficiently. \pause
+
+\begin{block}{Decisional Diffie-Hellman Problem (DDH)}
+Given $(g, u, v, h)$, four elements of $\mathbb{G}$, which with equal probability can be either all random elements of $\mathbb{G}$ or have the property that $\log_g u = \log_v h$, to output $0$ in the former case and $1$ in the latter case. 
+\end{block}
+\pause
+Difficulty of DDH $\le$ difficulty of CDH. If CDH is easy, then computing $g^{\log_g u \log_g v}$ and comparing with $h$ is an efficient algorithm for DDH.  
+
+\end{frame}
+
+\begin{frame}{Gap-DH and Bilinear Pairing~\cite{DBLP:conf/crypto/BonehF01}\footfullcite{DBLP:conf/crypto/BonehF01}}
+Gap-DH groups: for some groups $\mathbb{G}$, the \textit{Computational} DH problem is hard but the \textit{Decisional} DH problem is easy. \\
+\pause
+Works on Weil pairing showed the existence of such GDH groups. \\
+\pause 
+\begin{block}{Bilinear Pairing}
+    A mapping $e: \mathbb{G}_1\times \mathbb{G}_2\to \mathbb{G}_T$ is a bilinear map for groups $(\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T)$ with generators $g_1, g_2, g_T$ of prime order $q$, if it is:
+    \begin{itemize}
+        \item bilinear: $e(g_1^x, g_2^y) = e(g_1, g_2)^{xy}$. 
+        \item non-degenerate: $e(g_1, g_2)\neq 1_{\mathbb{G}_T}$. 
+        \item efficient: there is an efficient algorithm to compute $e(g_1^x, g_2^y)$. 
+    \end{itemize}
+\end{block}
+\pause 
+With a bilinear pairing from $\mathbb{G}\times \mathbb{G}$, a DDH problem for $(g, g^x, H(m),\sigma)$ is efficiently solved by checking $e(g, \sigma) = e(g^x, H(m))$.
+\end{frame}
+
+\begin{frame}  {BLS Signature~\cite{DBLP:journals/joc/BonehLS04} \footfullcite{DBLP:journals/joc/BonehLS04}}
+
+\begin{block}{BLS Digital Signature}
+    \begin{itemize}
+        \item Setup: (1) a cyclic multiplicative group $\mathbb{G}$ with a generator $g$ of prime order $q$. (2) a cryptographic hash function $H:\{0,1\}^\ast \to \mathbb{G}$. 
+        \item Gen: select a random $x\in \mathbb{Z}_{q}$, secret key is $x$, public key is $y=g^x \in \mathbb{G}$. 
+        \item Sgn: a message $m$ $\to$ a signature $\sigma = H(m)^x \in \mathbb{G}$. 
+        \item Ver: given a message $m$, a signature $\sigma$, a public key $y=g^x$, determine whether $\sigma = H(m)^{\log_g y}$ by checking if $e(g, \sigma) = e(y, H(m))$ holds.   
+    \end{itemize}
+\end{block} \pause
+\textbf{Unforgeablility}: the forging problem is a CDH problem. Given $g$, the public key $y=g^x$, and a message digest $H(m)$, it's hard to output a signature $\sigma=H(m)^{\log_g y}$.
+
+\end{frame}
+
+\begin{frame}{Component 2: Shamir's secret sharing}
+\textbf{(Threshold) secret sharing}: share a secret $x$ among $n$ parties $\{P_1,P_2,\dots, P_n\}$. 
+\begin{itemize}
+\item Each party $P_i$ knows a share of the secret $x_i$.
+\item Any subset of $\ge t$ parties can collaborate to reconstruct $x$ using their shares. 
+\item Any subset of $<t$ parties cannot reconstruct $x$. 
+\end{itemize}
+\pause 
+
+\vspace{0.5em}
+\textbf{Very simple construction}: use a univariate polynomial $f(z)=a_0 + a_1 z+\cdots a_{t-1}z^{t-1}$ of degree $\le t-1$. 
+\begin{itemize}
+    \item Choose $f$ such that $f(0)=a_0=x$, but other coefficients are uniformly at random. 
+    \item Send $f(i)$ to $P_i$, for $i\in\{1,2,\dots,n\}$. 
+    \item Reconstruction (Lagrange interpolation) using $t$ shares $\{(j_k, x_{j_k})\}_{k=1}^t$: \begin{equation*} 
+        f(z) = \sum_{k=1}^{t}\prod_{i \neq k }\frac{z - j_i}{j_k - j_i}\cdot x_{j_k} = \sum_{k=1}^t \lambda_{j_k}(z) x_{j_k}
+    \end{equation*}  
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{BLS threshold signature~\cite{DBLP:conf/pkc/Boldyreva03}\footfullcite{DBLP:conf/pkc/Boldyreva03}}
+    \vspace{-0.5em}
+\begin{itemize}
+    \item Setup: same as BLS signature. 
+    \item Gen: (suppose there is a trusted dealer) choose a random $x\in \mathbb{Z}_{q}$ as the secret key, distribute the shares $x_i$ to $P_i$. The public key is $y=g^x\in \mathbb{G}$. 
+    \item Sig: suppose $\{P_{j_1}, P_{j_2},\dots, P_{j_t}\}$ collaborate. Each $P_{j_i}$ generates \textit{partial signature} $\sigma_{j_i}=H(m)^{x_{j_i}}$. To compute $\sigma = H(m)^{x}$ (without revealing $x$ to anyone):\vspace{-0.5em} 
+    \begin{equation*}
+        \sigma = H(m)^{f(0)} = H(m)^{\sum_{i=1}^t \lambda_{j_i}(0) x_{j_i}} = \prod_{i=1}^t (H(m)^{x_{j_i}})^{\lambda_{S, j_i}(0)} = \prod_{i=1}^t \sigma_{j_i}^{\lambda_{S, j_i}(0)}
+    \end{equation*}
+    \vspace{-0.3em}
+    \item Ver: same as BLS signature, using $\mathsf{sk}=y$: $e(g, \sigma)=e(y, H(m))$. 
+\end{itemize}
+\vspace{0.5em}
+\pause 
+Very efficient: $O(1)$ signature size; $O(1)$ verification time. Gen: $O(t\log^2 t)$. 
+\end{frame}
+
+\begin{frame}{Others}
+    \begin{itemize}
+        \item \textbf{Schnorr threshold signature~\cite{DBLP:conf/sacrypt/KomloG20}} is also popular. It does not require bilinear pairing, but requires interaction among the set of signers. 
+        \item \textbf{(Threshold) Group/Ring signature~\cite{DBLP:conf/crypto/BressonSS02,DBLP:conf/asiacrypt/RivestST01}}: any (subset of) member can generate a signature on behalf of the group, but no one knows which member generated it. 
+        \item \textbf{Static vs. Adaptive Security~\cite{DBLP:conf/ccs/BachoL22,DBLP:conf/crypto/CritesKM23}}: whether the adversary controls fixed $t-1$ nodes throughout the protocol, or can change the set of corrupted nodes. 
+    \end{itemize}
+\end{frame}
